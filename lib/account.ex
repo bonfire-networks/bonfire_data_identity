@@ -6,7 +6,7 @@ defmodule CommonsPub.Accounts.Account do
 
   use Pointers.Pointable,
     otp_app: :cpub_accounts,
-    table_id: "DEVSER1S0STENS1B1YHVMAN01D",
+    table_id: "ACC0VNTSARE1S01AT10NGR0VPS",
     source: "cpub_accounts_account"
 
   alias CommonsPub.Accounts.Account
