@@ -12,18 +12,11 @@ defmodule CommonsPub.Accounts.Account do
   alias CommonsPub.Accounts.Account
   alias Pointers.Changesets
 
-  @cast []
-  @required []
-    
   pointable_schema do
   end
 
-  def changeset(account \\ %Account{}, attrs) do
-    config = Changesets.config(Changesets.verb(account), [])
-    account
-    |> Changesets.rename_cast(attrs, config, @cast)
-    |> Changesets.validate_required(attrs, config, @required)
-  end
+  def changeset(account \\ %Account{}, attrs, opts \\ []),
+    do: Changesets.auto(account, attrs, opts, [])
 
 end
 defmodule CommonsPub.Accounts.Account.Migration do
