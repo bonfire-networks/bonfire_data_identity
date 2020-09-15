@@ -43,7 +43,7 @@ defmodule CommonsPub.Accounts.Accounted.Migration do
     create_mixin_table(Accounted) do
       add :account_id, strong_pointer(Account), null: false 
     end
-    create_if_not_exists(unique_index(accounted_table(), [:account_id], index_opts))
+    create_if_not_exists(index(accounted_table(), [:account_id], index_opts))
   end
 
   defp migrate_accounted(_index_opts, :down) do
