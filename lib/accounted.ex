@@ -1,4 +1,4 @@
-defmodule CommonsPub.Accounts.Accounted do
+defmodule Bonfire.Data.Auth.Accounted do
   @moduledoc """
   A mixin for an account ID, indicating ownership
 
@@ -6,10 +6,10 @@ defmodule CommonsPub.Accounts.Accounted do
   """
 
   use Pointers.Mixin,
-    otp_app: :cpub_accounts,
-    source: "cpub_accounts_accounted"
+    otp_app: :bonfire_data_auth,
+    source: "bonfire_data_auth_accounted"
 
-  alias CommonsPub.Accounts.{Account, Accounted}
+  alias Bonfire.Data.Auth.{Account, Accounted}
   alias Pointers.Changesets
   alias Ecto.Changeset
 
@@ -22,33 +22,78 @@ defmodule CommonsPub.Accounts.Accounted do
     required: [:account_id],
   ]
 
-  def changeset(t \\ %Accounted{}, attrs, opts \\ []) do
-    Changesets.auto(t, attrs, opts, @defaults)
+  def changeset(acc \\ %Accounted{}, attrs, opts \\ []) do
+    Changesets.auto(acc, attrs, opts, @defaults)
     |> Changeset.foreign_key_constraint(:account_id)
   end
 
 end
-defmodule CommonsPub.Accounts.Accounted.Migration do
+defmodule Bonfire.Data.Auth.Accounted.Migration do
 
   import Ecto.Migration
   import Pointers.Migration
-  alias CommonsPub.Accounts.{Account, Accounted}
+  alias Bonfire.Data.Auth.Accounted
 
-  def migrate_accounted(index_opts \\ []),
-    do: migrate_accounted(index_opts, direction())
+  @accounted_table Accounted.__schema__(:source)
 
-  defp accounted_table(), do: Accounted.__schema__(:source)
+  # create_accounted_table/{0,1}
 
-  defp migrate_accounted(index_opts, :up) do
-    create_mixin_table(Accounted) do
-      add :account_id, strong_pointer(Account), null: false 
+  defp make_accounted_table(exprs) do
+    quote do
+      require Pointers.Migration
+      Pointers.Migration.create_mixin_table(Bonfire.Data.Auth.Accounted) do
+        add :account_id, strong_pointer(Bonfire.Data.Auth.Account), null: false 
+        unquote_splicing(exprs)
+      end
     end
-    create_if_not_exists(index(accounted_table(), [:account_id], index_opts))
   end
 
-  defp migrate_accounted(_index_opts, :down) do
-    drop_if_exists(index(accounted_table(), [:account_id]))
-    drop_mixin_table(accounted_table())
+  defmacro create_accounted_table(), do: make_accounted_table([])
+  defmacro create_accounted_table([do: {_, _, body}]), do: make_accounted_table(body)
+
+  # drop_accounted_table/0
+
+  def drop_accounted_table(), do: drop_mixin_table(Accounted)
+
+  defp make_accounted_account_index(opts) do
+    quote do
+      Ecto.Migration.create_if_not_exists(
+        Ecto.Migration.index(unquote(@accounted_table), [:account_id], unquote(opts))
+      )
+    end
   end
+
+  defmacro create_accounted_account_index(opts \\ [])
+  defmacro create_accounted_account_index(opts), do: make_accounted_account_index(opts)
+
+  def drop_accounted_account_index(opts \\ []) do
+    drop_if_exists(index(@accounted_table, [:account_id], opts))
+  end
+
+  # migrate_accounted/{0,1}
+
+  defp ma(:up) do
+    quote do
+      require Bonfire.Data.Auth.Accounted.Migration
+      Bonfire.Data.Auth.Accounted.Migration.create_accounted_table()
+      Bonfire.Data.Auth.Accounted.Migration.create_accounted_account_index()
+    end
+  end
+
+  defp ma(:down) do
+    quote do
+      Bonfire.Data.Auth.Accounted.Migration.drop_accounted_account_index()
+      Bonfire.Data.Auth.Accounted.Migration.drop_accounted_table()
+    end
+  end
+
+  defmacro migrate_accounted() do
+    quote do
+      if Ecto.Migration.direction() == :up,
+        do: unquote(ma(:up)),
+        else: unquote(ma(:down))
+    end
+  end
+  defmacro migrate_accounted(dir), do: ma(dir)
 
 end
