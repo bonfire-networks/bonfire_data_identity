@@ -1,4 +1,4 @@
-defmodule Bonfire.Data.Auth.Accounted do
+defmodule Bonfire.Data.Identity.Accounted do
   @moduledoc """
   A mixin for an account ID, indicating ownership
 
@@ -6,10 +6,10 @@ defmodule Bonfire.Data.Auth.Accounted do
   """
 
   use Pointers.Mixin,
-    otp_app: :bonfire_data_auth,
-    source: "bonfire_data_auth_accounted"
+    otp_app: :bonfire_data_identity,
+    source: "bonfire_data_identity_accounted"
 
-  alias Bonfire.Data.Auth.{Account, Accounted}
+  alias Bonfire.Data.Identity.{Account, Accounted}
   alias Pointers.Changesets
   alias Ecto.Changeset
 
@@ -28,11 +28,11 @@ defmodule Bonfire.Data.Auth.Accounted do
   end
 
 end
-defmodule Bonfire.Data.Auth.Accounted.Migration do
+defmodule Bonfire.Data.Identity.Accounted.Migration do
 
   import Ecto.Migration
   import Pointers.Migration
-  alias Bonfire.Data.Auth.Accounted
+  alias Bonfire.Data.Identity.Accounted
 
   @accounted_table Accounted.__schema__(:source)
 
@@ -41,8 +41,8 @@ defmodule Bonfire.Data.Auth.Accounted.Migration do
   defp make_accounted_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Auth.Accounted) do
-        add :account_id, strong_pointer(Bonfire.Data.Auth.Account), null: false 
+      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Accounted) do
+        add :account_id, strong_pointer(Bonfire.Data.Identity.Account), null: false 
         unquote_splicing(exprs)
       end
     end
@@ -54,6 +54,8 @@ defmodule Bonfire.Data.Auth.Accounted.Migration do
   # drop_accounted_table/0
 
   def drop_accounted_table(), do: drop_mixin_table(Accounted)
+
+  # create_accounted_account_index/{0, 1}
 
   defp make_accounted_account_index(opts) do
     quote do
@@ -74,16 +76,15 @@ defmodule Bonfire.Data.Auth.Accounted.Migration do
 
   defp ma(:up) do
     quote do
-      require Bonfire.Data.Auth.Accounted.Migration
-      Bonfire.Data.Auth.Accounted.Migration.create_accounted_table()
-      Bonfire.Data.Auth.Accounted.Migration.create_accounted_account_index()
+      unquote(make_accounted_table([]))
+      unquote(make_accounted_account_index([]))
     end
   end
 
   defp ma(:down) do
     quote do
-      Bonfire.Data.Auth.Accounted.Migration.drop_accounted_account_index()
-      Bonfire.Data.Auth.Accounted.Migration.drop_accounted_table()
+      Bonfire.Data.Identity.Accounted.Migration.drop_accounted_account_index()
+      Bonfire.Data.Identity.Accounted.Migration.drop_accounted_table()
     end
   end
 

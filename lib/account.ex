@@ -1,15 +1,15 @@
-defmodule Bonfire.Data.Auth.Account do
+defmodule Bonfire.Data.Identity.Account do
   @moduledoc """
   An account is an identity for authentication purposes. An account
   has one or more credentials with which it may identify.
   """
 
   use Pointers.Pointable,
-    otp_app: :bonfire_data_auth,
+    otp_app: :bonfire_data_identity,
     table_id: "ACC0VNTSARE1S01AT10NGR0VPS",
-    source: "bonfire_data_auth_account"
+    source: "bonfire_data_identity_account"
 
-  alias Bonfire.Data.Auth.Account
+  alias Bonfire.Data.Identity.Account
   alias Pointers.Changesets
 
   pointable_schema do
@@ -19,18 +19,18 @@ defmodule Bonfire.Data.Auth.Account do
     do: Changesets.auto(account, attrs, opts, [])
 
 end
-defmodule Bonfire.Data.Auth.Account.Migration do
+defmodule Bonfire.Data.Identity.Account.Migration do
 
   use Ecto.Migration
   import Pointers.Migration
-  alias Bonfire.Data.Auth.Account
+  alias Bonfire.Data.Identity.Account
 
   # create_account_table/{0,1}
 
   defp make_account_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_pointable_table(Bonfire.Data.Auth.Account) do
+      Pointers.Migration.create_pointable_table(Bonfire.Data.Identity.Account) do
         unquote_splicing(exprs)
       end
     end
@@ -41,18 +41,14 @@ defmodule Bonfire.Data.Auth.Account.Migration do
 
   # drop_account_table/0
 
-  def drop_account_table(), do: drop_pointable_table(Account)
+p  def drop_account_table(), do: drop_pointable_table(Account)
 
   # migrate_account/{0,1}
 
-  defp ma(:up) do
-    quote do
-      require Bonfire.Data.Auth.Account.Migration
-      Bonfire.Data.Auth.Account.Migration.create_account_table()
-    end
-  end
+  defp ma(:up), do: make_account_table([])
+
   defp ma(:down) do
-    quote do: Bonfire.Data.Auth.Account.Migration.drop_account_table()
+    quote do: Bonfire.Data.Identity.Account.Migration.drop_account_table()
   end
 
   defmacro migrate_account() do

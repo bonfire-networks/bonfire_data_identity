@@ -1,15 +1,15 @@
-defmodule Bonfire.Data.Auth.Credential do
+defmodule Bonfire.Data.Identity.Credential do
   @moduledoc """
   A Mixin that provides a local database login identity, i.e. a
   username/email/etc. and passwowrd.
   """
 
   use Pointers.Mixin,
-    otp_app: :bonfire_data_auth,
-    source: "bonfire_data_auth_credential"
+    otp_app: :bonfire_data_identity,
+    source: "bonfire_data_identity_credential"
 
   require Pointers.Changesets
-  alias Bonfire.Data.Auth.Credential
+  alias Bonfire.Data.Identity.Credential
   alias Ecto.Changeset
   alias Pointers.Changesets
 
@@ -35,11 +35,11 @@ defmodule Bonfire.Data.Auth.Credential do
   def hash_password(changeset), do: changeset
 
 end
-defmodule Bonfire.Data.Auth.Credential.Migration do
+defmodule Bonfire.Data.Identity.Credential.Migration do
 
   import Ecto.Migration
   import Pointers.Migration
-  alias Bonfire.Data.Auth.Credential
+  alias Bonfire.Data.Identity.Credential
 
   @credential_table Credential.__schema__(:source)
 
@@ -48,7 +48,7 @@ defmodule Bonfire.Data.Auth.Credential.Migration do
   defp make_credential_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Auth.Credential) do
+      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Credential) do
         add :identity, :text, null: false
         add :password_hash, :text, null: false
         unquote_splicing(exprs)
@@ -82,16 +82,15 @@ defmodule Bonfire.Data.Auth.Credential.Migration do
 
   defp ma(:up) do
     quote do
-      require Bonfire.Data.Auth.Credential.Migration
-      Bonfire.Data.Auth.Credential.Migration.create_credential_table()
-      Bonfire.Data.Auth.Credential.Migration.create_credential_identity_index()
+      unquote(make_credential_table([]))
+      unquote(make_credential_identity_index([]))
     end
   end
 
   defp ma(:down) do
     quote do
-      Bonfire.Data.Auth.Credential.Migration.drop_credential_identity_index()
-      Bonfire.Data.Auth.Credential.Migration.drop_credential_table()
+      Bonfire.Data.Identity.Credential.Migration.drop_credential_identity_index()
+      Bonfire.Data.Identity.Credential.Migration.drop_credential_table()
     end
   end
 

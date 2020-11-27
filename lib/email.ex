@@ -1,12 +1,12 @@
-defmodule Bonfire.Data.Auth.Email do
+defmodule Bonfire.Data.Identity.Email do
 
   use Pointers.Mixin,
-    otp_app: :bonfire_data_auth,
-    source: "bonfire_data_auth_email"
+    otp_app: :bonfire_data_identity,
+    source: "bonfire_data_identity_email"
 
   require Pointers.Changesets
   alias Pointers.Changesets
-  alias Bonfire.Data.Auth.Email
+  alias Bonfire.Data.Identity.Email
   alias Ecto.Changeset
   
   mixin_schema do
@@ -63,11 +63,11 @@ defmodule Bonfire.Data.Auth.Email do
   end
 
 end
-defmodule Bonfire.Data.Auth.Email.Migration do
+defmodule Bonfire.Data.Identity.Email.Migration do
 
   import Ecto.Migration
   import Pointers.Migration
-  alias Bonfire.Data.Auth.Email
+  alias Bonfire.Data.Identity.Email
 
   @email_table Email.__schema__(:source)
 
@@ -76,7 +76,7 @@ defmodule Bonfire.Data.Auth.Email.Migration do
   defp make_email_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Auth.Email) do
+      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Email) do
         add :address, :text, null: false 
         add :confirm_token, :text
         add :confirm_until, :timestamptz
@@ -98,7 +98,7 @@ defmodule Bonfire.Data.Auth.Email.Migration do
   defp make_email_address_index(opts) do
     quote do
       Ecto.Migration.create_if_not_exists(
-        Ecto.Migration.unique_index(unquote(@email_table), [:address_id], unquote(opts))
+        Ecto.Migration.unique_index(unquote(@email_table), [:address], unquote(opts))
       )
     end
   end
@@ -135,18 +135,17 @@ defmodule Bonfire.Data.Auth.Email.Migration do
 
   defp me(:up) do
     quote do
-      require Bonfire.Data.Auth.Email.Migration
-      Bonfire.Data.Auth.Email.Migration.create_email_table()
-      Bonfire.Data.Auth.Email.Migration.create_email_address_index()
-      Bonfire.Data.Auth.Email.Migration.create_email_confirm_token_index()
+      unquote(make_email_table([]))
+      unquote(make_email_address_index([]))
+      unquote(make_email_confirm_token_index([]))
     end
   end
 
   defp me(:down) do
     quote do
-      Bonfire.Data.Auth.Email.Migration.drop_email_confirm_token_index()
-      Bonfire.Data.Auth.Email.Migration.drop_email_address_index()
-      Bonfire.Data.Auth.Email.Migration.drop_email_table()
+      Bonfire.Data.Identity.Email.Migration.drop_email_confirm_token_index()
+      Bonfire.Data.Identity.Email.Migration.drop_email_address_index()
+      Bonfire.Data.Identity.Email.Migration.drop_email_table()
     end
   end
 
