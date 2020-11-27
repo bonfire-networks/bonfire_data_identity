@@ -8,7 +8,7 @@ defmodule Bonfire.Data.Identity.MixProject do
       version: "0.1.0",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
-      description: "Accounts, Users, related models for bonfire-ecosystem",
+      description: "Identity-related database models (e.g. Account, User) for the bonfire ecosystem",
       homepage_url: "https://github.com/bonfire-ecosystem/bonfire_data_identity",
       source_url: "https://github.com/bonfire-ecosystem/bonfire_data_identity",
       package: [
