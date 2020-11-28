@@ -49,8 +49,8 @@ defmodule Bonfire.Data.Identity.Credential.Migration do
     quote do
       require Pointers.Migration
       Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Credential) do
-        add :identity, :text, null: false
-        add :password_hash, :text, null: false
+        Ecto.Migration.add :identity, :text, null: false
+        Ecto.Migration.add :password_hash, :text, null: false
         unquote_splicing(exprs)
       end
     end
@@ -66,7 +66,7 @@ defmodule Bonfire.Data.Identity.Credential.Migration do
   defp make_credential_identity_index(opts) do
     quote do
       Ecto.Migration.create_if_not_exists(
-        Ecto.Migration.unique_index(unquote(@credential_table), [:identity_id], unquote(opts))
+        Ecto.Migration.unique_index(unquote(@credential_table), [:identity], unquote(opts))
       )
     end
   end
@@ -75,19 +75,19 @@ defmodule Bonfire.Data.Identity.Credential.Migration do
   defmacro create_credential_identity_index(opts), do: make_credential_identity_index(opts)
 
   def drop_credential_identity_index(opts \\ []) do
-    drop_if_exists(index(@credential_table, [:identity_id], opts))
+    drop_if_exists(index(@credential_table, [:identity], opts))
   end
 
   # migrate_credential/{0,1}
 
-  defp ma(:up) do
+  defp mc(:up) do
     quote do
       unquote(make_credential_table([]))
       unquote(make_credential_identity_index([]))
     end
   end
 
-  defp ma(:down) do
+  defp mc(:down) do
     quote do
       Bonfire.Data.Identity.Credential.Migration.drop_credential_identity_index()
       Bonfire.Data.Identity.Credential.Migration.drop_credential_table()
@@ -97,10 +97,10 @@ defmodule Bonfire.Data.Identity.Credential.Migration do
   defmacro migrate_credential() do
     quote do
       if Ecto.Migration.direction() == :up,
-        do: unquote(ma(:up)),
-        else: unquote(ma(:down))
+        do: unquote(mc(:up)),
+        else: unquote(mc(:down))
     end
   end
-  defmacro migrate_credential(dir), do: ma(dir)
+  defmacro migrate_credential(dir), do: mc(dir)
 
 end

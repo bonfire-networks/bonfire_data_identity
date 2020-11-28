@@ -10,7 +10,7 @@ defmodule Bonfire.Data.Identity.Email do
   alias Ecto.Changeset
   
   mixin_schema do
-    field :email, :string
+    field :email_address, :string
     field :confirm_token, :string
     field :confirm_until, :utc_datetime_usec
     field :confirmed_at, :utc_datetime_usec
@@ -19,20 +19,20 @@ defmodule Bonfire.Data.Identity.Email do
   @default_confirm_duration {60 * 60 * 24, :second} # one day
 
   @defaults [
-    cast:     [:email],
-    required: [:email],
-    email: [ format: ~r(^[^@]{1,128}@[^@\.]+\.[^@]{2,128}$) ],
+    cast:     [:email_address],
+    required: [:email_address],
+    email_address: [ format: ~r(^[^@]{1,128}@[^@\.]+\.[^@]{2,128}$) ],
   ]
 
   def changeset(email \\ %Email{}, attrs, opts \\ []) do
     Changesets.auto(email, attrs, opts, @defaults)
     |> put_token_on_email_change()
-    |> Changeset.unique_constraint(:email)
+    |> Changeset.unique_constraint(:email_address)
   end
 
   @doc false
   def put_token_on_email_change(changeset)
-  def put_token_on_email_change(%Changeset{valid?: true, changes: %{email: _}}=changeset) do
+  def put_token_on_email_change(%Changeset{valid?: true, changes: %{email_address: _}}=changeset) do
     if Changesets.config_for(__MODULE__, :must_confirm, true),
       do: put_token(changeset),
       else: Changeset.change(changeset, confirmed_at: DateTime.utc_now())
@@ -77,10 +77,10 @@ defmodule Bonfire.Data.Identity.Email.Migration do
     quote do
       require Pointers.Migration
       Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Email) do
-        add :address, :text, null: false 
-        add :confirm_token, :text
-        add :confirm_until, :timestamptz
-        add :confirmed_at, :timestamptz
+        Ecto.Migration.add :email_address, :text, null: false 
+        Ecto.Migration.add :confirm_token, :text
+        Ecto.Migration.add :confirm_until, :timestamptz
+        Ecto.Migration.add :confirmed_at, :timestamptz
         unquote_splicing(exprs)
       end
     end
@@ -98,7 +98,7 @@ defmodule Bonfire.Data.Identity.Email.Migration do
   defp make_email_address_index(opts) do
     quote do
       Ecto.Migration.create_if_not_exists(
-        Ecto.Migration.unique_index(unquote(@email_table), [:address], unquote(opts))
+        Ecto.Migration.unique_index(unquote(@email_table), [:email_address], unquote(opts))
       )
     end
   end
@@ -109,7 +109,7 @@ defmodule Bonfire.Data.Identity.Email.Migration do
   # drop_email_address_index/{0,1}
 
   def drop_email_address_index(opts \\ []) do
-    drop_if_exists(unique_index(@email_table, [:address], opts))
+    drop_if_exists(unique_index(@email_table, [:email_address], opts))
   end
 
   # create_email_confirm_token_index/{0,1}

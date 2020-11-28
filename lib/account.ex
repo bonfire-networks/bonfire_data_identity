@@ -41,7 +41,7 @@ defmodule Bonfire.Data.Identity.Account.Migration do
 
   # drop_account_table/0
 
-p  def drop_account_table(), do: drop_pointable_table(Account)
+  def drop_account_table(), do: drop_pointable_table(Account)
 
   # migrate_account/{0,1}
 
