@@ -1,21 +1,34 @@
 defmodule Bonfire.Data.Identity.Character do
+  @moduledoc """
+  A username almost-mixin that denies reuse of the same or similar
+  usernames even when the username has been deleted.
 
-  use Pointers.Mixin,
-    otp_app: :bonfire_data_identity,
-    source: "bonfire_data_identity_character"
+  Character is slightly unusual in that its primary key is actually a
+  hashed username rather than the id, which is only subject to a
+  unique constraint so that it can be nulled. A primary key is needed
+  to make logical replication work smoothly.
+  """
 
-  alias Pointers.Changesets
+  use Ecto.Schema
   require Pointers.Changesets
+  alias Pointers.{Changesets, Pointer}
   alias Bonfire.Data.Identity.Character
   alias Ecto.Changeset
-  
-  mixin_schema do
+  import Flexto
+
+  @source "bonfire_data_identity_character"
+  source = Application.get_env(:bonfire_data_identity, :source, @source)
+
+  @primary_key false
+  schema source do
+    belongs_to :id, Pointer
     field :username, :string
-    field :username_hash, :string
+    field :username_hash, :string, primary_key: true
+    flex_schema(:bonfire_data_identity)
   end
 
   @defaults [
-    cast:     [:username],
+    cast:     [:id, :username],
     required: [:username],
     username: [ format: ~r(^[a-z][a-z0-9_]{2,30}$)i ],
   ]
@@ -23,7 +36,7 @@ defmodule Bonfire.Data.Identity.Character do
   def changeset(char \\ %Character{}, attrs, opts \\ []) do
     Changesets.auto(char, attrs, opts, @defaults)
     |> Changesets.replicate_map_valid_change(:username, :username_hash, &hash/1)
-    |> Changeset.unique_constraint(:username)
+    |> Changeset.unique_constraint(:id)
     |> Changeset.unique_constraint(:username_hash)
   end
 
@@ -60,9 +73,11 @@ defmodule Bonfire.Data.Identity.Character.Migration do
   defp make_character_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Character) do
+      table = Ecto.Migration.table(unquote(@character_table), primary_key: false)
+      Ecto.Migration.create_if_not_exists table do
+        Ecto.Migration.add :id, Pointers.Migration.weak_pointer()
         Ecto.Migration.add :username, :citext
-        Ecto.Migration.add :username_hash, :citext, null: false
+        Ecto.Migration.add :username_hash, :citext, primary_key: true
         unquote_splicing(exprs)
       end
     end
@@ -73,7 +88,7 @@ defmodule Bonfire.Data.Identity.Character.Migration do
 
   # drop_character_table/0
 
-  def drop_character_table(), do: drop_mixin_table(Character)
+  def drop_character_table(), do: drop_if_exists(table(@character_table))
 
   # create_character_username_index/{0, 1}
 
@@ -109,6 +124,48 @@ defmodule Bonfire.Data.Identity.Character.Migration do
     drop_if_exists(unique_index(@character_table, [:username_hash], opts))
   end
 
+  @function_up """
+  create or replace function bonfire_identity_delete_username()
+  returns trigger as $$
+  begin
+    if NEW.id is null then
+      NEW.username = null;
+    end if;
+    return NEW;
+  end;
+  $$ language plpgsql
+  """
+  @function_down """
+  drop function if exists delete_username()
+  """
+  @trigger_up """
+  create trigger "#{@character_table}_delete_username_trigger"
+  before update on "#{@character_table}"
+  for each row execute procedure bonfire_identity_delete_username()
+  """
+
+  @trigger_down """
+  drop trigger if exists
+  "#{@character_table}_delete_username_trigger"
+  on "#{@character_table}"
+  """
+
+  def create_character_trigger_function(opts \\ []) do
+    execute(@function_up)
+  end
+
+  def drop_character_trigger_function(opts \\ []) do
+    execute(@function_down)
+  end
+
+  def create_character_trigger(opts \\ []) do
+    drop_character_trigger(opts) # because there is no create trigger if not exists
+    execute(@trigger_up)
+  end
+
+  def drop_character_trigger(opts \\ []) do
+    execute(@trigger_down)
+  end
 
   # migrate_character/{0,1}
 
@@ -117,10 +174,15 @@ defmodule Bonfire.Data.Identity.Character.Migration do
       unquote(make_character_table([]))
       unquote(make_character_username_index([]))
       unquote(make_character_username_hash_index([]))
+      Ecto.Migration.flush()
+      Bonfire.Data.Identity.Character.Migration.create_character_trigger_function()
+      Bonfire.Data.Identity.Character.Migration.create_character_trigger()
     end      
   end
   defp mc(:down) do
     quote do
+      Bonfire.Data.Identity.Character.Migration.drop_character_trigger()
+      Bonfire.Data.Identity.Character.Migration.drop_character_trigger_function()
       Bonfire.Data.Identity.Character.Migration.drop_character_username_hash_index()
       Bonfire.Data.Identity.Character.Migration.drop_character_username_index()
       Bonfire.Data.Identity.Character.Migration.drop_character_table()

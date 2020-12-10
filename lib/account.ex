@@ -9,10 +9,11 @@ defmodule Bonfire.Data.Identity.Account do
     table_id: "ACC0VNTSARE1S01AT10NGR0VPS",
     source: "bonfire_data_identity_account"
 
-  alias Bonfire.Data.Identity.Account
+  alias Bonfire.Data.Identity.{Account, Accounted}
   alias Pointers.Changesets
 
   pointable_schema do
+    has_many :accounted, Accounted, foreign_key: :account_id
   end
 
   def changeset(account \\ %Account{}, attrs, opts \\ []),
