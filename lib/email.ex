@@ -4,10 +4,9 @@ defmodule Bonfire.Data.Identity.Email do
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_email"
 
-  require Pointers.Changesets
-  alias Pointers.Changesets
   alias Bonfire.Data.Identity.Email
   alias Ecto.Changeset
+  alias Pointers.Changesets
   
   mixin_schema do
     field :email_address, :string, redact: true
@@ -18,27 +17,23 @@ defmodule Bonfire.Data.Identity.Email do
 
   @default_confirm_duration {60 * 60 * 24, :second} # one day
 
-  @defaults [
-    cast:     [:email_address],
-    required: [:email_address],
-    email_address: [ format: ~r(^[^@]{1,128}@[^@\.]+\.[^@]{2,128}$) ],
-  ]
-
-  def changeset(email \\ %Email{}, attrs, opts \\ []) do
-    Changesets.auto(email, attrs, opts, @defaults)
-    |> put_token_on_email_change()
+  def changeset(email \\ %Email{}, params, opts \\ []) do
+    opts = opts ++ Changesets.config_for(__MODULE__)
+    Changeset.cast(email, params, [:email_address])
+    |> put_token_on_email_change(opts)
+    |> Changeset.validate_format(:email_address, ~r(^[^@]{1,128}@[^@\.]+\.[^@]{2,128}$))
     |> Changeset.unique_constraint(:email_address)
     |> Changeset.validate_required([:email_address])
   end
 
   @doc false
-  def put_token_on_email_change(changeset)
-  def put_token_on_email_change(%Changeset{valid?: true, changes: %{email_address: _}}=changeset) do
-    if Changesets.config_for(__MODULE__, :must_confirm, true),
+  def put_token_on_email_change(changeset, opts \\ [])
+  def put_token_on_email_change(%Changeset{valid?: true, changes: %{email_address: _}}=changeset, opts) do
+    if Keyword.get(opts, :must_confirm, true),
       do: put_token(changeset),
       else: Changeset.change(changeset, confirmed_at: DateTime.utc_now())
   end
-  def put_token_on_email_change(%Changeset{}=changeset), do: changeset
+  def put_token_on_email_change(%Changeset{}=changeset, _opts), do: changeset
 
   @doc """
   Changeset function. Unconditionally sets the user as unconfirmed,

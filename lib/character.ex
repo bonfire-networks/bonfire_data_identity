@@ -24,22 +24,21 @@ defmodule Bonfire.Data.Identity.Character do
   @foreign_key_type ULID
   schema source do
     belongs_to :pointer, Pointer, foreign_key: :id
-    field :username, :string
+    field :username, :string, redact: true
     field :username_hash, :string, primary_key: true
     flex_schema(:bonfire_data_identity)
   end
 
-  @defaults [
-    cast:     [:id, :username],
-    required: [:username],
-    username: [ format: ~r(^[a-z][a-z0-9_]{2,30}$)i ],
-  ]
+  @cast     [:id, :username]
+  @required [:username]
+  @username ~r(^[a-z][a-z0-9_]{2,30}$)i
 
-  def changeset(char \\ %Character{}, attrs, opts \\ []) do
-    Changesets.auto(char, attrs, opts, @defaults)
+  def changeset(char \\ %Character{}, params, opts \\ []) do
+    Changeset.cast(params, @cast)
+    |> Changesets.validate_required(@required)
     |> Changesets.replicate_map_valid_change(:username, :username_hash, &hash/1)
     |> Changeset.unique_constraint(:id)
-    |> Changeset.unique_constraint(:username_hash)
+    |> Changeset.assoc_constraint(:pointer)
   end
 
   def hash(name) do
@@ -58,8 +57,6 @@ defmodule Bonfire.Data.Identity.Character do
   defp fold("2"), do: "z"
   defp fold("5"), do: "s"
   defp fold("_"), do: ""
-
-  def redact(%Character{}=char), do: Changeset.change(char, username: nil)
 
   def __pointers__(:otp_app), do: :bonfire_data_identity
   def __pointers__(:role), do: :mixin

@@ -17,19 +17,16 @@ defmodule Bonfire.Data.Identity.Credential do
     field :password_hash, :string
   end
 
-  @defaults [
-    cast:     [:password],
-    required: [:password],
-  ]
+  @cast     [:password]
+  @required [:password]
 
-  def changeset(cred \\ %Credential{}, attrs, opts \\ []) do
-    Changesets.auto(cred, attrs, opts, @defaults)
-    |> hash_password()
+  def changeset(cred \\ %Credential{}, params) do
+    cred
+    |> Changeset.cast(params, @cast)
+    |> Changeset.validate_required(@required)
+    |> Changeset.validate_length(:password, min: 10, max: 64)
+    |> Changesets.replicate_map_valid_change(:password, :password_hash, &Argon2.hash_pwd_salt/1)
   end
-
-  def hash_password(%Changeset{valid?: true, changes: %{password: password}}=changeset),
-    do: Changeset.change(changeset, Argon2.add_hash(password))
-  def hash_password(changeset), do: changeset
 
 end
 defmodule Bonfire.Data.Identity.Credential.Migration do

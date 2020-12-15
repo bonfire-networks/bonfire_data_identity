@@ -10,15 +10,15 @@ defmodule Bonfire.Data.Identity.Account do
     source: "bonfire_data_identity_account"
 
   alias Bonfire.Data.Identity.{Account, Accounted}
-  alias Pointers.Changesets
+  alias Ecto.Changeset
 
   pointable_schema do
     has_many :accounted, Accounted, foreign_key: :account_id
   end
 
-  def changeset(account \\ %Account{}, attrs, opts \\ []),
-    do: Changesets.auto(account, attrs, opts, [])
-
+  def changeset(account \\ %Account{}, params) do
+    Changeset.cast(account, params, [])
+  end
 end
 defmodule Bonfire.Data.Identity.Account.Migration do
 

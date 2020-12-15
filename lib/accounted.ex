@@ -10,20 +10,19 @@ defmodule Bonfire.Data.Identity.Accounted do
     source: "bonfire_data_identity_accounted"
 
   alias Bonfire.Data.Identity.{Account, Accounted}
-  alias Pointers.Changesets
   alias Ecto.Changeset
 
   mixin_schema do
     belongs_to :account, Account
   end
 
-  @defaults [
-    cast: [:id, :account_id],
-    required: [:account_id],
-  ]
+  @cast [:id, :account_id]
+  @required [:account_id]
 
-  def changeset(acc \\ %Accounted{}, attrs, opts \\ []) do
-    Changesets.auto(acc, attrs, opts, @defaults)
+  def changeset(acc \\ %Accounted{}, params) do
+    acc
+    |> Changeset.cast(params, @cast)
+    |> Changeset.validate_required(@required)
     |> Changeset.foreign_key_constraint(:account_id)
   end
 

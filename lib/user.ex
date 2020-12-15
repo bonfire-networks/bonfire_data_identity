@@ -11,13 +11,14 @@ defmodule Bonfire.Data.Identity.User do
     source: "bonfire_data_identity_user"
 
   alias Bonfire.Data.Identity.User
-  alias Pointers.Changesets
+  alias Ecto.Changeset
 
   pointable_schema do
   end
 
-  def changeset(user \\ %User{}, attrs, opts \\ []),
-    do: Changesets.auto(user, attrs, opts, [])
+  def changeset(user \\ %User{}, params) do
+    Changeset.cast(user, params, [])
+  end
 
 end
 defmodule Bonfire.Data.Identity.User.Migration do
