@@ -1,7 +1,6 @@
 defmodule Bonfire.Data.Identity.Credential do
   @moduledoc """
-  A Mixin that provides a local database login identity, i.e. a
-  username/email/etc. and passwowrd.
+  A Mixin that provides a password for local login.
   """
 
   use Pointers.Mixin,
@@ -14,19 +13,17 @@ defmodule Bonfire.Data.Identity.Credential do
   alias Pointers.Changesets
 
   mixin_schema do
-    field :identity, :string
-    field :password, :string, virtual: true
+    field :password, :string, virtual: true, redact: true
     field :password_hash, :string
   end
 
   @defaults [
-    cast:     [:identity, :password],
-    required: [:identity, :password],
+    cast:     [:password],
+    required: [:password],
   ]
 
   def changeset(cred \\ %Credential{}, attrs, opts \\ []) do
     Changesets.auto(cred, attrs, opts, @defaults)
-    |> Changeset.unique_constraint(:identity)
     |> hash_password()
   end
 
@@ -49,7 +46,6 @@ defmodule Bonfire.Data.Identity.Credential.Migration do
     quote do
       require Pointers.Migration
       Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Credential) do
-        Ecto.Migration.add :identity, :text, null: false
         Ecto.Migration.add :password_hash, :text, null: false
         unquote_splicing(exprs)
       end
@@ -63,33 +59,12 @@ defmodule Bonfire.Data.Identity.Credential.Migration do
 
   def drop_credential_table(), do: drop_mixin_table(Credential)
 
-  defp make_credential_identity_index(opts) do
-    quote do
-      Ecto.Migration.create_if_not_exists(
-        Ecto.Migration.unique_index(unquote(@credential_table), [:identity], unquote(opts))
-      )
-    end
-  end
-
-  defmacro create_credential_identity_index(opts \\ [])
-  defmacro create_credential_identity_index(opts), do: make_credential_identity_index(opts)
-
-  def drop_credential_identity_index(opts \\ []) do
-    drop_if_exists(index(@credential_table, [:identity], opts))
-  end
-
   # migrate_credential/{0,1}
 
-  defp mc(:up) do
-    quote do
-      unquote(make_credential_table([]))
-      unquote(make_credential_identity_index([]))
-    end
-  end
+  defp mc(:up), do: make_credential_table([])
 
   defp mc(:down) do
     quote do
-      Bonfire.Data.Identity.Credential.Migration.drop_credential_identity_index()
       Bonfire.Data.Identity.Credential.Migration.drop_credential_table()
     end
   end

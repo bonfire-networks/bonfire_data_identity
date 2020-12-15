@@ -1,17 +1,18 @@
 defmodule Bonfire.Data.Identity.Character do
   @moduledoc """
-  A username almost-mixin that denies reuse of the same or similar
-  usernames even when the username has been deleted.
+  A username mixin that denies reuse of the same or similar usernames
+  even when the username has been deleted.
 
   Character is slightly unusual in that its primary key is actually a
   hashed username rather than the id, which is only subject to a
-  unique constraint so that it can be nulled. A primary key is needed
-  to make logical replication work smoothly.
+  unique constraint so that it can be nulled.
+
+  A primary key is needed to make logical replication work smoothly.
   """
 
   use Ecto.Schema
   require Pointers.Changesets
-  alias Pointers.{Changesets, Pointer}
+  alias Pointers.{Changesets, Pointer, ULID}
   alias Bonfire.Data.Identity.Character
   alias Ecto.Changeset
   import Flexto
@@ -20,8 +21,9 @@ defmodule Bonfire.Data.Identity.Character do
   source = Application.get_env(:bonfire_data_identity, :source, @source)
 
   @primary_key false
+  @foreign_key_type ULID
   schema source do
-    belongs_to :id, Pointer
+    belongs_to :pointer, Pointer, foreign_key: :id
     field :username, :string
     field :username_hash, :string, primary_key: true
     flex_schema(:bonfire_data_identity)
@@ -59,11 +61,12 @@ defmodule Bonfire.Data.Identity.Character do
 
   def redact(%Character{}=char), do: Changeset.change(char, username: nil)
 
+  def __pointers__(:otp_app), do: :bonfire_data_identity
+  def __pointers__(:role), do: :mixin
 end
 defmodule Bonfire.Data.Identity.Character.Migration do
 
   import Ecto.Migration
-  import Pointers.Migration
   alias Bonfire.Data.Identity.Character
 
   @character_table Character.__schema__(:source)
@@ -150,11 +153,11 @@ defmodule Bonfire.Data.Identity.Character.Migration do
   on "#{@character_table}"
   """
 
-  def create_character_trigger_function(opts \\ []) do
+  def create_character_trigger_function(_opts \\ []) do
     execute(@function_up)
   end
 
-  def drop_character_trigger_function(opts \\ []) do
+  def drop_character_trigger_function(_opts \\ []) do
     execute(@function_down)
   end
 
@@ -163,7 +166,7 @@ defmodule Bonfire.Data.Identity.Character.Migration do
     execute(@trigger_up)
   end
 
-  def drop_character_trigger(opts \\ []) do
+  def drop_character_trigger(_opts \\ []) do
     execute(@trigger_down)
   end
 

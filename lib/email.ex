@@ -10,7 +10,7 @@ defmodule Bonfire.Data.Identity.Email do
   alias Ecto.Changeset
   
   mixin_schema do
-    field :email_address, :string
+    field :email_address, :string, redact: true
     field :confirm_token, :string
     field :confirm_until, :utc_datetime_usec
     field :confirmed_at, :utc_datetime_usec
@@ -28,6 +28,7 @@ defmodule Bonfire.Data.Identity.Email do
     Changesets.auto(email, attrs, opts, @defaults)
     |> put_token_on_email_change()
     |> Changeset.unique_constraint(:email_address)
+    |> Changeset.validate_required([:email_address])
   end
 
   @doc false
