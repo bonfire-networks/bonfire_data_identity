@@ -11,8 +11,7 @@ defmodule Bonfire.Data.Identity.Character do
   """
 
   use Ecto.Schema
-  require Pointers.Changesets
-  alias Pointers.{Changesets, Pointer, ULID}
+  alias Pointers.{Pointer, ULID}
   alias Bonfire.Data.Identity.Character
   alias Ecto.Changeset
   import Flexto
@@ -29,15 +28,18 @@ defmodule Bonfire.Data.Identity.Character do
     flex_schema(:bonfire_data_identity)
   end
 
-  @cast     [:id, :username]
+  @cast     [:username]
   @required [:username]
-  @username ~r(^[a-z][a-z0-9_]{2,30}$)i
+  @pk_constraint "bonfire_data_identity_character_pkey"
 
-  def changeset(char \\ %Character{}, params, opts \\ []) do
-    Changeset.cast(params, @cast)
-    |> Changesets.validate_required(@required)
-    |> Changesets.replicate_map_valid_change(:username, :username_hash, &hash/1)
+  def changeset(char \\ %Character{}, params) do
+    char
+    |> Changeset.cast(params, @cast)
+    |> Changeset.validate_required(@required)
     |> Changeset.unique_constraint(:id)
+    |> Changeset.unique_constraint(:username)
+    # flag this on username even though it's the username hash
+    |> Changeset.unique_constraint(:username, name: @pk_constraint)
     |> Changeset.assoc_constraint(:pointer)
   end
 

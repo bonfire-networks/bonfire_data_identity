@@ -15,7 +15,7 @@ defmodule Bonfire.Data.Identity.Caretaker do
     belongs_to :caretaker, Pointer
   end
 
-  @cast [:id, :caretaker_id]
+  @cast     [:caretaker_id]
   @required [:caretaker_id]
 
   def changeset(ct \\ %Caretaker{}, params, opts \\ []) do

@@ -16,7 +16,7 @@ defmodule Bonfire.Data.Identity.Accounted do
     belongs_to :account, Account
   end
 
-  @cast [:id, :account_id]
+  @cast     [:account_id]
   @required [:account_id]
 
   def changeset(acc \\ %Accounted{}, params) do
