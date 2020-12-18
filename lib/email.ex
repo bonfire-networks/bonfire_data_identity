@@ -16,12 +16,13 @@ defmodule Bonfire.Data.Identity.Email do
   end
 
   @default_confirm_duration {60 * 60 * 24, :second} # one day
+  @default_email_regex ~r(^[^@]{1,128}@[^@]{2,128}$) # pretty loose
 
   def changeset(email \\ %Email{}, params, opts \\ []) do
-    opts = opts ++ Changesets.config_for(__MODULE__)
+    regex = config(opts, :email_regex, @default_email_regex)
     Changeset.cast(email, params, [:email_address])
     |> put_token_on_email_change(opts)
-    |> Changeset.validate_format(:email_address, ~r(^[^@]{1,128}@[^@\.]+\.[^@]{2,128}$))
+    |> Changeset.validate_format(:email_address, regex)
     |> Changeset.unique_constraint(:email_address)
     |> Changeset.validate_required([:email_address])
   end
@@ -29,7 +30,7 @@ defmodule Bonfire.Data.Identity.Email do
   @doc false
   def put_token_on_email_change(changeset, opts \\ [])
   def put_token_on_email_change(%Changeset{valid?: true, changes: %{email_address: _}}=changeset, opts) do
-    if Keyword.get(opts, :must_confirm, true),
+    if config(opts, :must_confirm, true),
       do: put_token(changeset),
       else: Changeset.change(changeset, confirmed_at: DateTime.utc_now())
   end
@@ -42,7 +43,7 @@ defmodule Bonfire.Data.Identity.Email do
   """
   def put_token(%Email{}=email), do: put_token(Changeset.cast(email, %{}, []))
   def put_token(%Changeset{}=changeset) do
-    {count, unit} = Changesets.config_for(__MODULE__, :confirm_duration, @default_confirm_duration)
+    {count, unit} = config(:confirm_duration, @default_confirm_duration)
     token = Base.encode32(:crypto.strong_rand_bytes(16), padding: false)
     until = DateTime.add(DateTime.utc_now(), count, unit)
     Changeset.change(changeset, confirmed_at: nil, confirm_token: token, confirm_until: until)
@@ -57,6 +58,14 @@ defmodule Bonfire.Data.Identity.Email do
     |> Changeset.cast(%{}, [])
     |> Changeset.change(confirm_token: nil, confirm_until: nil, confirmed_at: DateTime.utc_now())
   end
+
+  @doc false
+  def config(), do: Changesets.config_for(__MODULE__)
+  @doc false
+  def config(k, d), do: Changesets.config_for(__MODULE__, k, d)
+  @doc false
+  def config(opts, k, d), do: Keyword.get(opts ++ config(), k, d)
+
 
 end
 defmodule Bonfire.Data.Identity.Email.Migration do
