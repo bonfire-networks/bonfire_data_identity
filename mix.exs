@@ -1,4 +1,3 @@
-Code.eval_file("mess.exs")
 defmodule Bonfire.Data.Identity.MixProject do
   use Mix.Project
 
@@ -22,7 +21,12 @@ defmodule Bonfire.Data.Identity.MixProject do
         main: "readme",
         extras: ["README.md"],
       ],
-      deps: Mess.deps [ {:ex_doc, ">= 0.0.0", only: :dev, runtime: false} ]
+      deps: [
+        {:pointers, "~> 0.5.1"},
+#        {:argon2_elixir = "~> 2.3", optional: true},
+#        {:pbkdf2_elixir = "~> 1.2", optional: true},
+        {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      ]
     ]
   end
 

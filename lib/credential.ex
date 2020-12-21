@@ -7,6 +7,7 @@ defmodule Bonfire.Data.Identity.Credential do
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_credential"
 
+  require Logger
   require Pointers.Changesets
   alias Bonfire.Data.Identity.Credential
   alias Ecto.Changeset
@@ -25,8 +26,14 @@ defmodule Bonfire.Data.Identity.Credential do
     |> Changeset.cast(params, @cast)
     |> Changeset.validate_required(@required)
     |> Changeset.validate_length(:password, min: 10, max: 64)
-    |> Changesets.replicate_map_valid_change(:password, :password_hash, &Argon2.hash_pwd_salt/1)
+    |> Changesets.replicate_map_valid_change(:password, :password_hash, &hash_password/1)
   end
+
+  config = Application.get_env(:bonfire_data_identity, __MODULE__, [])
+  @module Keyword.fetch!(config, :hasher_module)
+  def hash_password(password), do: @module.hash_pwd_salt(password)
+  def check_password(password, hash), do: @module.verify_pass(password, hash)
+  def dummy_check(), do: @module.no_user_verify()
 
 end
 defmodule Bonfire.Data.Identity.Credential.Migration do
