@@ -8,6 +8,8 @@ defmodule Bonfire.Data.Identity.Email do
   alias Ecto.Changeset
   alias Pointers.Changesets
   
+  @type t() :: %Email{}
+
   mixin_schema do
     field :email_address, :string, redact: true
     field :confirm_token, :string
@@ -18,23 +20,31 @@ defmodule Bonfire.Data.Identity.Email do
   @default_confirm_duration {60 * 60 * 24, :second} # one day
   @default_email_regex ~r(^[^@]{1,128}@[^@]{2,128}$) # pretty loose
 
+  @doc """
+  Options:
+    email_regex: Regexp.t (default very minimal validation)
+    must_confirm?: bool (default true)
+  """
   def changeset(email \\ %Email{}, params, opts \\ []) do
     regex = config(opts, :email_regex, @default_email_regex)
     Changeset.cast(email, params, [:email_address])
-    |> put_token_on_email_change(opts)
     |> Changeset.validate_format(:email_address, regex)
-    |> Changeset.unique_constraint(:email_address)
     |> Changeset.validate_required([:email_address])
+    |> Changeset.unique_constraint(:email_address)
+    |> on_email_change(opts)
   end
 
   @doc false
-  def put_token_on_email_change(changeset, opts \\ [])
-  def put_token_on_email_change(%Changeset{valid?: true, changes: %{email_address: _}}=changeset, opts) do
-    if config(opts, :must_confirm, true),
-      do: put_token(changeset),
-      else: Changeset.change(changeset, confirmed_at: DateTime.utc_now())
+  def on_email_change(changeset, opts \\ [])
+  def on_email_change(%Changeset{}=cs, opts) do
+    if cs.valid? && cs.changes[:email_address] do
+      if must_confirm?(opts),
+        do: put_token(cs),
+        else: confirm(cs)
+    else
+      cs
+    end
   end
-  def put_token_on_email_change(%Changeset{}=changeset, _opts), do: changeset
 
   @doc """
   Changeset function. Unconditionally sets the user as unconfirmed,
@@ -53,10 +63,21 @@ defmodule Bonfire.Data.Identity.Email do
   Changeset function. Marks the user's email as confirmed and removes
   their confirmation token.
   """
-  def confirm(%Email{}=email) do
-    email
-    |> Changeset.cast(%{}, [])
-    |> Changeset.change(confirm_token: nil, confirm_until: nil, confirmed_at: DateTime.utc_now())
+  def confirm(%Email{}=email), do: confirm(Changeset.cast(email, %{}, []))
+  def confirm(%Changeset{data: %Email{}}=changeset) do
+    Changeset.change changeset,
+      confirm_token: nil, confirm_until: nil, confirmed_at: DateTime.utc_now()
+  end
+    
+  @spec may_request_confirm_email?(Email.t) :: {:ok, :resend | :refresh} | {:error, binary}
+  @doc "Checks whether the user should be able to request a confirm email"
+  def may_request_confirm_email?(%Email{}=email, opts \\ []) do
+    cond do
+      not is_nil(email.confirmed_at) -> {:error, "already_confirmed"}
+      not must_confirm?(opts)        -> {:error, "confirmation_disabled"}
+      DateTime.compare(email.confirm_until, DateTime.utc_now()) == :lt -> {:ok, :resend}
+      true -> {:ok, :refresh}
+    end
   end
 
   @doc false
@@ -66,6 +87,8 @@ defmodule Bonfire.Data.Identity.Email do
   @doc false
   def config(opts, k, d), do: Keyword.get(opts ++ config(), k, d)
 
+  @doc false
+  def must_confirm?(opts), do: config(opts, :must_confirm?, true)
 
 end
 defmodule Bonfire.Data.Identity.Email.Migration do
