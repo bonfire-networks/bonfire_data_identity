@@ -80,6 +80,16 @@ defmodule Bonfire.Data.Identity.Email do
     end
   end
 
+  def may_confirm?(%Email{}=email, opts \\ []) do
+    cond do
+      not is_nil(email.confirmed_at) -> {:error, "already_confirmed"}
+      is_nil(email.confirm_until) -> {:error, "no_expiry"}
+      not must_confirm?(opts)     -> {:error, "confirmation_disabled"}
+      DateTime.compare(email.confirm_until, DateTime.utc_now()) == :gt -> :ok
+      true -> {:error, :expired}
+    end
+  end
+
   @doc false
   def config(), do: Changesets.config_for(__MODULE__)
   @doc false
