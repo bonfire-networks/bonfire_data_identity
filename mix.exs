@@ -23,13 +23,18 @@ defmodule Bonfire.Data.Identity.MixProject do
       ],
       deps: [
         {:pointers, "~> 0.5.1"},
-#        {:argon2_elixir = "~> 2.3", optional: true},
-#        {:pbkdf2_elixir = "~> 1.2", optional: true},
+#        {:pointers, path: "../../pointers"},
+#        {:argon2_elixir, "~> 2.3", optional: true},
+        {:pbkdf2_elixir, "~> 1.2", optional: true},
         {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      ]
+      ],
     ]
   end
 
-  def application, do: [extra_applications: [:logger]]
+  def application do
+    [ env: [{Bonfire.Data.Identity.Credential, hasher_module: Argon2}],
+      extra_applications: [:logger],
+    ]
+  end
 
 end

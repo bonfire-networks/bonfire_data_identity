@@ -10,59 +10,54 @@ defmodule Bonfire.Data.Identity.Character do
   A primary key is needed to make logical replication work smoothly.
   """
 
-  use Ecto.Schema
-  alias Pointers.{Pointer, ULID}
+  use Pointers.Unpointable,
+    otp_app: :bonfire_data_identity,
+    source: "bonfire_data_identity_character"
+
   alias Bonfire.Data.Identity.Character
   alias Ecto.Changeset
-  import Flexto
+  alias Pointers.Changesets
 
-  @source "bonfire_data_identity_character"
-  source = Application.get_env(:bonfire_data_identity, :source, @source)
-
-  @primary_key false
-  @foreign_key_type ULID
-  schema source do
-    belongs_to :pointer, Pointer, foreign_key: :id
+  unpointable_schema do
     field :username, :string, redact: true
-    field :username_hash, :string, primary_key: true
-    flex_schema(:bonfire_data_identity)
+    field :username_hash, :string
   end
 
   @cast     [:username]
-  @required [:username]
-  @pk_constraint "bonfire_data_identity_character_pkey"
+  @required @cast
 
-  def changeset(char \\ %Character{}, params) do
+  def changeset(char \\ %Character{}, params, extra \\ nil)
+  def changeset(char, params, nil) do
     char
     |> Changeset.cast(params, @cast)
     |> Changeset.validate_required(@required)
-    |> Changeset.unique_constraint(:id)
     |> Changeset.unique_constraint(:username)
-    # flag this on username even though it's the username hash
-    |> Changeset.unique_constraint(:username, name: @pk_constraint)
-    |> Changeset.assoc_constraint(:pointer)
+  end
+  def changeset(char, params, :hash) do
+    changeset(char, params, nil)
+    |> Changeset.unique_constraint(:username_hash)
+    |> Changesets.replicate_map_valid_change(:username, :username_hash, &hash/1)
   end
 
   def hash(name) do
-    :crypto.hash(:blake2b, uniform(name))
+    :crypto.hash(:sha256, uniform(name))
     |> Base.encode64(padding: false)
   end
-
+ 
   def uniform(name) do
     name
     |> String.downcase(:ascii)
     |> String.replace(~r/[0125_]/, &fold/1)
   end
-
+ 
   defp fold("0"), do: "o"
   defp fold("1"), do: "i"
   defp fold("2"), do: "z"
   defp fold("5"), do: "s"
   defp fold("_"), do: ""
 
-  def __pointers__(:otp_app), do: :bonfire_data_identity
-  def __pointers__(:role), do: :mixin
 end
+
 defmodule Bonfire.Data.Identity.Character.Migration do
 
   import Ecto.Migration
@@ -75,11 +70,9 @@ defmodule Bonfire.Data.Identity.Character.Migration do
   defp make_character_table(exprs) do
     quote do
       require Pointers.Migration
-      table = Ecto.Migration.table(unquote(@character_table), primary_key: false)
-      Ecto.Migration.create_if_not_exists table do
-        Ecto.Migration.add :id, Pointers.Migration.weak_pointer()
+      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Character) do
         Ecto.Migration.add :username, :citext
-        Ecto.Migration.add :username_hash, :citext, primary_key: true
+        Ecto.Migration.add :username_hash, :citext
         unquote_splicing(exprs)
       end
     end
