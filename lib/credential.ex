@@ -30,8 +30,8 @@ defmodule Bonfire.Data.Identity.Credential do
   end
 
   config = Application.get_env(:bonfire_data_identity, __MODULE__, [])
-  IO.inspect(config: config)
   @module Keyword.fetch!(config, :hasher_module)
+
   def hash_password(password), do: @module.hash_pwd_salt(password)
   def check_password(password, hash), do: @module.verify_pass(password, hash)
   def dummy_check(), do: @module.no_user_verify()
