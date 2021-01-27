@@ -7,7 +7,7 @@ defmodule Bonfire.Data.Identity.User do
 
   use Pointers.Pointable,
     otp_app: :bonfire_data_identity,
-    table_id: "DEVSER1S0STENS1B1YHVMAN01D",
+    table_id: "5EVSER1S0STENS1B1YHVMAN01D",
     source: "bonfire_data_identity_user"
 
   alias Bonfire.Data.Identity.User
