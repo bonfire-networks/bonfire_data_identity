@@ -3,6 +3,7 @@ defmodule Bonfire.Data.Identity.Character do
   A username mixin that denies reuse of the same or similar usernames
   even when the username has been deleted.
 
+  FIXME: is the below still the case?
   Character is slightly unusual in that its primary key is actually a
   hashed username rather than the id, which is only subject to a
   unique constraint so that it can be nulled.
@@ -43,13 +44,13 @@ defmodule Bonfire.Data.Identity.Character do
     :crypto.hash(:sha256, uniform(name))
     |> Base.encode64(padding: false)
   end
- 
+
   def uniform(name) do
     name
     |> String.downcase(:ascii)
     |> String.replace(~r/[0125_]/, &fold/1)
   end
- 
+
   defp fold("0"), do: "o"
   defp fold("1"), do: "i"
   defp fold("2"), do: "z"
@@ -172,7 +173,7 @@ defmodule Bonfire.Data.Identity.Character.Migration do
       Ecto.Migration.flush()
       Bonfire.Data.Identity.Character.Migration.create_character_trigger_function()
       Bonfire.Data.Identity.Character.Migration.create_character_trigger()
-    end      
+    end
   end
   defp mc(:down) do
     quote do
