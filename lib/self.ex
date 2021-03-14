@@ -52,7 +52,7 @@ defmodule Bonfire.Data.Identity.Self.Migration do
 
   # drop_self_table/0
 
-  def drop_self_table(), do: drop_pointable_table(Self)
+  def drop_self_table(), do: drop_mixin_table(Self)
 
   # migrate_self/{0,1}
 
