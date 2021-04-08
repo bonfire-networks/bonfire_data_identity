@@ -30,7 +30,8 @@ defmodule Bonfire.Data.Identity.Credential do
   end
 
   config = Application.get_env(:bonfire_data_identity, __MODULE__, [])
-  @module Keyword.fetch!(config, :hasher_module)
+  IO.inspect(config)
+  @module Keyword.get(config, :hasher_module, Argon2)
 
   def hash_password(password), do: @module.hash_pwd_salt(password)
   def check_password(password, hash), do: @module.verify_pass(password, hash)
