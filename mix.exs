@@ -8,12 +8,12 @@ defmodule Bonfire.Data.Identity.MixProject do
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       description: "Identity-related database models (e.g. Account, User) for the bonfire ecosystem",
-      homepage_url: "https://github.com/bonfire-ecosystem/bonfire_data_identity",
-      source_url: "https://github.com/bonfire-ecosystem/bonfire_data_identity",
+      homepage_url: "https://github.com/bonfire-networks/bonfire_data_identity",
+      source_url: "https://github.com/bonfire-networks/bonfire_data_identity",
       package: [
         licenses: ["MPL 2.0"],
         links: %{
-          "Repository" => "https://github.com/bonfire-ecosystem/bonfire_data_identity",
+          "Repository" => "https://github.com/bonfire-networks/bonfire_data_identity",
           "Hexdocs" => "https://hexdocs.pm/bonfire_data_identity",
         },
       ],
