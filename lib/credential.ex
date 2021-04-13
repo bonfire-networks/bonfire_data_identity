@@ -30,7 +30,7 @@ defmodule Bonfire.Data.Identity.Credential do
   end
 
   config = Application.get_env(:bonfire_data_identity, __MODULE__, [])
-  IO.inspect(config)
+  # IO.inspect(config)
   @module Keyword.get(config, :hasher_module, Argon2)
 
   def hash_password(password), do: @module.hash_pwd_salt(password)
@@ -40,11 +40,11 @@ defmodule Bonfire.Data.Identity.Credential do
 end
 defmodule Bonfire.Data.Identity.Credential.Migration do
 
-  import Ecto.Migration
+  # import Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.Credential
 
-  @credential_table Credential.__schema__(:source)
+  # @credential_table Credential.__schema__(:source)
 
   # create_credential_table/{0,1}
 

@@ -7,7 +7,7 @@ defmodule Bonfire.Data.Identity.Self do
   alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.Identity.Self
   alias Ecto.Changeset
-  alias Pointers.Pointer
+  # alias Pointers.Pointer
 
   mixin_schema do
     belongs_to :self_acl, Acl

@@ -18,7 +18,7 @@ defmodule Bonfire.Data.Identity.Caretaker do
   @cast     [:caretaker_id]
   @required [:caretaker_id]
 
-  def changeset(ct \\ %Caretaker{}, params, opts \\ []) do
+  def changeset(ct \\ %Caretaker{}, params, _opts \\ []) do
     ct
     |> Changeset.cast(params, @cast)
     |> Changeset.validate_required(@required)
@@ -41,7 +41,7 @@ defmodule Bonfire.Data.Identity.Caretaker.Migration do
       require Pointers.Migration
       Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Caretaker) do
         add :caretaker_id,
-          Pointers.Migration.strong_pointer(), null: false 
+          Pointers.Migration.strong_pointer(), null: false
         unquote_splicing(exprs)
       end
     end
