@@ -7,7 +7,7 @@ defmodule Bonfire.Data.Identity.Email do
   alias Bonfire.Data.Identity.Email
   alias Ecto.Changeset
   alias Pointers.Changesets
-  
+
   @type t() :: %Email{}
 
   mixin_schema do
@@ -57,7 +57,7 @@ defmodule Bonfire.Data.Identity.Email do
     token = Base.encode32(:crypto.strong_rand_bytes(16), padding: false)
     until = DateTime.add(DateTime.utc_now(), count, unit)
     Changeset.change(changeset, confirmed_at: nil, confirm_token: token, confirm_until: until)
-  end    
+  end
 
   @doc """
   Changeset function. Marks the user's email as confirmed and removes
@@ -68,15 +68,23 @@ defmodule Bonfire.Data.Identity.Email do
     Changeset.change changeset,
       confirm_token: nil, confirm_until: nil, confirmed_at: DateTime.utc_now()
   end
-    
+
+  @spec should_request_or_refresh?(Email.t) :: {:ok, :resend | :refresh} | {:error, binary}
+  @doc "Checks whether the user should request a new confirmation token or refresh it"
+  def should_request_or_refresh?(%Email{}=email, opts \\ []) do
+    cond do
+      email.confirm_until && DateTime.compare(email.confirm_until, DateTime.utc_now()) == :lt -> {:ok, :resend}
+      true -> {:ok, :refresh}
+    end
+  end
+
   @spec may_request_confirm_email?(Email.t) :: {:ok, :resend | :refresh} | {:error, binary}
   @doc "Checks whether the user should be able to request a confirm email"
   def may_request_confirm_email?(%Email{}=email, opts \\ []) do
     cond do
       not is_nil(email.confirmed_at) -> {:error, "already_confirmed"}
       not must_confirm?(opts)        -> {:error, "confirmation_disabled"}
-      DateTime.compare(email.confirm_until, DateTime.utc_now()) == :lt -> {:ok, :resend}
-      true -> {:ok, :refresh}
+      true -> should_request_or_refresh?(email, opts)
     end
   end
 
@@ -115,7 +123,7 @@ defmodule Bonfire.Data.Identity.Email.Migration do
     quote do
       require Pointers.Migration
       Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Email) do
-        Ecto.Migration.add :email_address, :text, null: false 
+        Ecto.Migration.add :email_address, :text, null: false
         Ecto.Migration.add :confirm_token, :text
         Ecto.Migration.add :confirm_until, :timestamptz
         Ecto.Migration.add :confirmed_at, :timestamptz
