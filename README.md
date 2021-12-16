@@ -1,6 +1,6 @@
-# bonfire\_data\_identity
+# Bonfire.Data.Identity
 
-
+Schemas for accounts, users, etc.
 
 ## Copyright and License
 
