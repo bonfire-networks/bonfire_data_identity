@@ -41,7 +41,7 @@ defmodule Bonfire.Data.Identity.Accounted.Migration do
     quote do
       require Pointers.Migration
       Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Accounted) do
-        add :account_id, strong_pointer(Bonfire.Data.Identity.Account), null: false 
+        add :account_id, strong_pointer(), null: false 
         unquote_splicing(exprs)
       end
     end

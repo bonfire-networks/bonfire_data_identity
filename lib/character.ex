@@ -48,13 +48,15 @@ defmodule Bonfire.Data.Identity.Character do
   def uniform(name) do
     name
     |> String.downcase(:ascii)
-    |> String.replace(~r/[0125_]/, &fold/1)
+    |> String.replace(~r/[012357_]/, &fold/1)
   end
 
   defp fold("0"), do: "o"
   defp fold("1"), do: "i"
   defp fold("2"), do: "z"
+  defp fold("3"), do: "e"
   defp fold("5"), do: "s"
+  defp fold("7"), do: "l"
   defp fold("_"), do: ""
 
 end

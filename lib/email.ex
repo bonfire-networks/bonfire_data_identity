@@ -71,7 +71,7 @@ defmodule Bonfire.Data.Identity.Email do
 
   @spec should_request_or_refresh?(Email.t) :: {:ok, :resend | :refresh} | {:error, binary}
   @doc "Checks whether the user should request a new confirmation token or refresh it"
-  def should_request_or_refresh?(%Email{}=email, opts \\ []) do
+  def should_request_or_refresh?(%Email{}=email, _opts \\ []) do
     cond do
       email.confirm_until && DateTime.compare(email.confirm_until, DateTime.utc_now()) == :lt -> {:ok, :resend}
       true -> {:ok, :refresh}
