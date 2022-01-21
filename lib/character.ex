@@ -18,6 +18,7 @@ defmodule Bonfire.Data.Identity.Character do
   alias Bonfire.Data.Identity.Character
   alias Ecto.Changeset
   alias Pointers.Changesets
+  alias Pointers.ULID
 
   unpointable_schema do
     field :username, :string, redact: true
@@ -29,10 +30,12 @@ defmodule Bonfire.Data.Identity.Character do
 
   def changeset(char \\ %Character{}, params, extra \\ nil)
   def changeset(char, params, nil) do
+    params = Map.put(params, :inbox, %{feed: %{id: ULID.generate()}})
     char
     |> Changeset.cast(params, @cast)
     |> Changeset.validate_required(@required)
     |> Changeset.unique_constraint(:username)
+    |> Changeset.cast_assoc(:inbox)
   end
   def changeset(char, params, :hash) do
     changeset(char, params, nil)
