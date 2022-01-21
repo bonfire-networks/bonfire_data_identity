@@ -18,11 +18,16 @@ defmodule Bonfire.Data.Identity.Character do
   alias Bonfire.Data.Identity.Character
   alias Ecto.Changeset
   alias Pointers.Changesets
+  alias Pointers.Pointer
   alias Pointers.ULID
 
   unpointable_schema do
     field :username, :string, redact: true
     field :username_hash, :string
+
+    # Feeds
+    belongs_to :outbox, Bonfire.Data.Social.Feed
+    belongs_to :inbox, Bonfire.Data.Social.Feed
   end
 
   @cast     [:username]
@@ -30,11 +35,15 @@ defmodule Bonfire.Data.Identity.Character do
 
   def changeset(char \\ %Character{}, params, extra \\ nil)
   def changeset(char, params, nil) do
-    params = Map.put(params, :inbox, %{feed: %{id: ULID.generate()}})
+    params = params
+    |> Map.put_new(:inbox, %{feed: %{id: ULID.generate()}})
+    |> Map.put_new(:outbox, %{feed: %{id: ULID.generate()}})
+
     char
     |> Changeset.cast(params, @cast)
     |> Changeset.validate_required(@required)
     |> Changeset.unique_constraint(:username)
+    |> Changeset.cast_assoc(:outbox)
     |> Changeset.cast_assoc(:inbox)
   end
   def changeset(char, params, :hash) do
@@ -79,6 +88,10 @@ defmodule Bonfire.Data.Identity.Character.Migration do
       Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Character) do
         Ecto.Migration.add :username, :citext
         Ecto.Migration.add :username_hash, :citext
+
+        add :outbox_id, Pointers.Migration.weak_pointer()
+        add :inbox_id, Pointers.Migration.weak_pointer()
+
         unquote_splicing(exprs)
       end
     end
