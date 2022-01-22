@@ -35,12 +35,10 @@ defmodule Bonfire.Data.Identity.Character do
 
   def changeset(char \\ %Character{}, params, extra \\ nil)
   def changeset(char, params, nil) do
-    params = params
-    |> Map.put_new(:inbox, %{feed: %{id: ULID.generate()}})
-    |> Map.put_new(:outbox, %{feed: %{id: ULID.generate()}})
-
+    boxes = %{inbox: %{id: ULID.generate()}, outbox: %{id: ULID.generate()}}
     char
     |> Changeset.cast(params, @cast)
+    |> Changeset.cast(boxes, [])
     |> Changeset.validate_required(@required)
     |> Changeset.unique_constraint(:username)
     |> Changeset.cast_assoc(:outbox)

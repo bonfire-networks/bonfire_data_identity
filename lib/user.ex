@@ -18,6 +18,7 @@ defmodule Bonfire.Data.Identity.User do
 
   def changeset(user \\ %User{}, params) do
     Changeset.cast(user, params, [])
+    |> Changeset.cast_assoc(:encircles)
   end
 
 end
