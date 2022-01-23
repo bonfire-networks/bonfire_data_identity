@@ -44,6 +44,13 @@ defmodule Bonfire.Data.Identity.Character do
     |> Changeset.cast_assoc(:outbox)
     |> Changeset.cast_assoc(:inbox)
   end
+  def changeset(char, params, :update) do
+    char
+    |> Changeset.cast(params, @cast)
+    |> Changeset.unique_constraint(:username)
+    |> Changeset.cast_assoc(:outbox)
+    |> Changeset.cast_assoc(:inbox)
+  end
   def changeset(char, params, :hash) do
     changeset(char, params, nil)
     |> Changeset.unique_constraint(:username_hash)
