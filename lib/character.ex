@@ -28,10 +28,11 @@ defmodule Bonfire.Data.Identity.Character do
     # Feeds
     belongs_to :outbox, Bonfire.Data.Social.Feed
     belongs_to :inbox, Bonfire.Data.Social.Feed
+    belongs_to :notifications, Bonfire.Data.Social.Feed
   end
 
-  @cast     [:username]
-  @required @cast
+  @cast     [:username, :outbox_id, :inbox_id, :notifications_id]
+  @required [:username]
 
   def changeset(char \\ %Character{}, params, extra \\ nil)
   def changeset(char, params, nil) do
@@ -43,6 +44,7 @@ defmodule Bonfire.Data.Identity.Character do
     |> Changeset.unique_constraint(:username)
     |> Changeset.cast_assoc(:outbox)
     |> Changeset.cast_assoc(:inbox)
+    |> Changeset.cast_assoc(:notifications)
   end
   def changeset(char, params, :update) do
     char
@@ -50,6 +52,7 @@ defmodule Bonfire.Data.Identity.Character do
     |> Changeset.cast(params, [])
     |> Changeset.cast_assoc(:outbox)
     |> Changeset.cast_assoc(:inbox)
+    |> Changeset.cast_assoc(:notifications)
   end
   def changeset(char, params, :hash) do
     changeset(char, params, nil)
@@ -96,6 +99,7 @@ defmodule Bonfire.Data.Identity.Character.Migration do
 
         add :outbox_id, Pointers.Migration.weak_pointer()
         add :inbox_id, Pointers.Migration.weak_pointer()
+        add :notifications_id, Pointers.Migration.weak_pointer()
 
         unquote_splicing(exprs)
       end
