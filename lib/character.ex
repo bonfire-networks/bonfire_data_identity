@@ -55,9 +55,9 @@ defmodule Bonfire.Data.Identity.Character do
     char
     # |> IO.inspect
     |> Changeset.cast(params, [])
-    |> Changeset.cast_assoc(:outbox)
-    |> Changeset.cast_assoc(:inbox)
-    |> Changeset.cast_assoc(:notifications)
+    # |> Changeset.cast_assoc(:outbox)
+    # |> Changeset.cast_assoc(:inbox)
+    # |> Changeset.cast_assoc(:notifications)
   end
   def changeset(char, params, :hash) do
     changeset(char, params, nil)
