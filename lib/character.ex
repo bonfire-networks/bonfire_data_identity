@@ -2,13 +2,6 @@ defmodule Bonfire.Data.Identity.Character do
   @moduledoc """
   A username mixin that denies reuse of the same or similar usernames
   even when the username has been deleted.
-
-  FIXME: is the below still the case?
-  Character is slightly unusual in that its primary key is actually a
-  hashed username rather than the id, which is only subject to a
-  unique constraint so that it can be nulled.
-
-  A primary key is needed to make logical replication work smoothly.
   """
 
   use Pointers.Unpointable,
@@ -33,7 +26,6 @@ defmodule Bonfire.Data.Identity.Character do
 
   @cast     [:username, :outbox_id, :inbox_id, :notifications_id]
   @required [:username]
-  @cast_all     @cast ++ @required
 
   def changeset(char \\ %Character{}, params, extra \\ nil)
   def changeset(char, params, nil) do
@@ -43,7 +35,7 @@ defmodule Bonfire.Data.Identity.Character do
       notifications: %{id: ULID.generate()}
     }
     char
-    |> Changeset.cast(params, @cast_all)
+    |> Changeset.cast(params, @cast)
     |> Changeset.cast(boxes, [])
     |> Changeset.validate_required(@required)
     |> Changeset.unique_constraint(:username)
