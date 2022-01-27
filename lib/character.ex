@@ -33,6 +33,7 @@ defmodule Bonfire.Data.Identity.Character do
 
   @cast     [:username, :outbox_id, :inbox_id, :notifications_id]
   @required [:username]
+  @cast_all     @cast ++ @required
 
   def changeset(char \\ %Character{}, params, extra \\ nil)
   def changeset(char, params, nil) do
@@ -42,7 +43,7 @@ defmodule Bonfire.Data.Identity.Character do
       notifications: %{id: ULID.generate()}
     }
     char
-    |> Changeset.cast(params, @cast)
+    |> Changeset.cast(params, @cast_all)
     |> Changeset.cast(boxes, [])
     |> Changeset.validate_required(@required)
     |> Changeset.unique_constraint(:username)
@@ -54,7 +55,7 @@ defmodule Bonfire.Data.Identity.Character do
   def changeset(char, params, :update) do
     char
     # |> IO.inspect
-    |> Changeset.cast(params, [])
+    |> Changeset.cast(params, @cast)
     # |> Changeset.cast_assoc(:outbox)
     # |> Changeset.cast_assoc(:inbox)
     # |> Changeset.cast_assoc(:notifications)
