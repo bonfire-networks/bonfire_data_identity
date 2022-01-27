@@ -36,7 +36,11 @@ defmodule Bonfire.Data.Identity.Character do
 
   def changeset(char \\ %Character{}, params, extra \\ nil)
   def changeset(char, params, nil) do
-    boxes = %{inbox: %{id: ULID.generate()}, outbox: %{id: ULID.generate()}}
+    boxes = %{
+      outbox: %{id: ULID.generate()},
+      inbox: %{id: ULID.generate()},
+      notifications: %{id: ULID.generate()}
+    }
     char
     |> Changeset.cast(params, @cast)
     |> Changeset.cast(boxes, [])
@@ -45,6 +49,7 @@ defmodule Bonfire.Data.Identity.Character do
     |> Changeset.cast_assoc(:outbox)
     |> Changeset.cast_assoc(:inbox)
     |> Changeset.cast_assoc(:notifications)
+    # |> IO.inspect()
   end
   def changeset(char, params, :update) do
     char
