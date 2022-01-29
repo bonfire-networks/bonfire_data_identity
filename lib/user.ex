@@ -1,7 +1,7 @@
 defmodule Bonfire.Data.Identity.User do
   @moduledoc """
   A persona. A person (account) may have more than one user, but this
-  is not exposed publically (except to local instance administrators),
+  is not exposed publicly (except to local instance administrators),
   so it is as if they are different people.
   """
 
