@@ -4,7 +4,7 @@ defmodule Bonfire.Data.Identity.Character do
   even when the username has been deleted.
   """
 
-  use Pointers.Unpointable,
+  use Pointers.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_character"
 
@@ -14,7 +14,7 @@ defmodule Bonfire.Data.Identity.Character do
   alias Pointers.Pointer
   alias Pointers.ULID
 
-  unpointable_schema do
+  mixin_schema do
     field :username, :string, redact: true
     field :username_hash, :string
 
@@ -24,21 +24,16 @@ defmodule Bonfire.Data.Identity.Character do
     belongs_to :notifications, Bonfire.Data.Social.Feed
   end
 
-  @cast     [:username, :outbox_id, :inbox_id, :notifications_id]
-  @required [:username]
+  @cast     [:id, :username, :outbox_id, :inbox_id, :notifications_id]
+  @required [:id, :username]
 
   def changeset(char \\ %Character{}, params, extra \\ nil)
   def changeset(char, params, nil) do
-    boxes = %{
-      outbox: %{id: ULID.generate()},
-      inbox: %{id: ULID.generate()},
-      notifications: %{id: ULID.generate()}
-    }
     char
     |> Changeset.cast(params, @cast)
-    |> Changeset.cast(boxes, [])
     |> Changeset.validate_required(@required)
     |> Changeset.unique_constraint(:username)
+    |> cast_boxes(params)
     |> Changeset.cast_assoc(:outbox)
     |> Changeset.cast_assoc(:inbox)
     |> Changeset.cast_assoc(:notifications)
@@ -58,6 +53,23 @@ defmodule Bonfire.Data.Identity.Character do
     |> Changesets.replicate_map_valid_change(:username, :username_hash, &hash/1)
   end
 
+  defp cast_boxes(changeset, params) do
+    if changeset.valid? do
+      id = Changeset.get_field(changeset, :id)
+      boxes =
+        for key <- [:outbox, :inbox, :notifications], reduce: %{} do
+          acc ->
+            Map.put(acc, key, %{
+              id: ULID.generate(),
+              caretaker: %{caretaker_id: :id},
+            })
+        end
+      Changeset.cast(changeset, boxes, [])
+    else
+      changeset
+    end
+  end
+
   def hash(name) do
     :crypto.hash(:sha256, uniform(name))
     |> Base.encode64(padding: false)
@@ -66,15 +78,17 @@ defmodule Bonfire.Data.Identity.Character do
   def uniform(name) do
     name
     |> String.downcase(:ascii)
-    |> String.replace(~r/[012357_]/, &fold/1)
+    |> String.replace(~r/[0123578i_]/, &fold/1)
   end
 
   defp fold("0"), do: "o"
-  defp fold("1"), do: "i"
+  defp fold("1"), do: "l"
   defp fold("2"), do: "z"
   defp fold("3"), do: "e"
   defp fold("5"), do: "s"
   defp fold("7"), do: "l"
+  defp fold("8"), do: "b"
+  defp fold("i"), do: "l"
   defp fold("_"), do: ""
 
 end

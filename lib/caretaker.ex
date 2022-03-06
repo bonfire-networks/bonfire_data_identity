@@ -1,6 +1,12 @@
 defmodule Bonfire.Data.Identity.Caretaker do
   @moduledoc """
-  The entity responsible for something.
+  The entity responsible for something. In practice, it means that
+  something is deleted when its caretaker is deleted.
+
+  You can think of it as being like the creator, except:
+  a) You can give it away.
+  b) Objects can take care of arbitrary objects, such as e.g. custom
+     ACLs created to permit people mentioned special permissions
   """
 
   use Pointers.Mixin,
