@@ -29,9 +29,7 @@ defmodule Bonfire.Data.Identity.Credential do
     |> Changesets.replicate_map_valid_change(:password, :password_hash, &hash_password/1)
   end
 
-  config = Application.get_env(:bonfire_data_identity, __MODULE__, [])
-  # IO.inspect(config)
-  @module Keyword.get(config, :hasher_module, Argon2)
+  @module Application.compile_env(:bonfire_data_identity, [__MODULE__, :hasher_module], Argon2)
 
   def hash_password(password), do: @module.hash_pwd_salt(password)
   def check_password(password, hash), do: @module.verify_pass(password, hash)
