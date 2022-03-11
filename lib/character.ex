@@ -10,33 +10,27 @@ defmodule Bonfire.Data.Identity.Character do
 
   alias Bonfire.Data.Identity.Character
   alias Ecto.Changeset
-  alias Pointers.Changesets
-  alias Pointers.Pointer
-  alias Pointers.ULID
+  alias Pointers.{Changesets, Pointer, ULID}
 
   mixin_schema do
     field :username, :string, redact: true
-    field :username_hash, :string
-
+    field :username_hash, :string, redact: true
     # Feeds
     belongs_to :outbox, Bonfire.Data.Social.Feed
     belongs_to :inbox, Bonfire.Data.Social.Feed
     belongs_to :notifications, Bonfire.Data.Social.Feed
   end
 
-  @cast     [:id, :username, :outbox_id, :inbox_id, :notifications_id]
-  @required [:id, :username]
+  @cast     [:username]
+  @required [:username]
 
   def changeset(char \\ %Character{}, params, extra \\ nil)
   def changeset(char, params, nil) do
     char
-    |> Changeset.cast(params, @cast)
+    |> Changesets.cast(params, @cast)
     |> Changeset.validate_required(@required)
     |> Changeset.unique_constraint(:username)
     |> cast_boxes(params)
-    |> Changeset.cast_assoc(:outbox)
-    |> Changeset.cast_assoc(:inbox)
-    |> Changeset.cast_assoc(:notifications)
     # |> IO.inspect()
   end
   def changeset(char, params, :update) do

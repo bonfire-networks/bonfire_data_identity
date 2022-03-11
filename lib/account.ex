@@ -11,14 +11,14 @@ defmodule Bonfire.Data.Identity.Account do
 
   alias Bonfire.Data.Identity.{Account, Accounted}
   alias Ecto.Changeset
+  alias Pointers.Changesets
 
   virtual_schema do
     has_many :accounted, Accounted, foreign_key: :account_id
   end
 
-  def changeset(account \\ %Account{}, params) do
-    Changeset.cast(account, params, [])
-  end
+  def changeset(account \\ %Account{}, params), do: Changesets.cast(account, params, [])
+
 end
 defmodule Bonfire.Data.Identity.Account.Migration do
 

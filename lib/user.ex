@@ -11,17 +11,12 @@ defmodule Bonfire.Data.Identity.User do
     source: "bonfire_data_identity_user"
 
   alias Bonfire.Data.Identity.User
-  alias Ecto.Changeset
-  alias Pointers.ULID
+  alias Pointers.Changesets
 
   virtual_schema do
   end
 
-  def changeset(user \\ %User{}, params) do
-    Changeset.cast(user, params, [:id])
-    |> Pointers.Changesets.default_id()
-    |> Changeset.cast_assoc(:encircles)
-  end
+  def changeset(user \\ %User{}, params), do: Changesets.cast(user, params, [])
 
 end
 defmodule Bonfire.Data.Identity.User.Migration do
