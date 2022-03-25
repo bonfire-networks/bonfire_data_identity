@@ -8,17 +8,18 @@ defmodule Bonfire.Data.Identity.Character do
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_character"
 
-  alias Bonfire.Data.Identity.Character
+  alias Bonfire.Data.Identity.{Caretaker, Character}
+  alias Bonfire.Data.Social.Feed
   alias Ecto.Changeset
   alias Pointers.{Changesets, Pointer, ULID}
+  import Where
 
   mixin_schema do
     field :username, :string, redact: true
     field :username_hash, :string, redact: true
-    # Feeds
-    belongs_to :outbox, Bonfire.Data.Social.Feed
-    belongs_to :inbox, Bonfire.Data.Social.Feed
-    belongs_to :notifications, Bonfire.Data.Social.Feed
+    belongs_to :outbox, Feed
+    belongs_to :inbox, Feed
+    belongs_to :notifications, Feed
   end
 
   @cast     [:username]
@@ -30,16 +31,12 @@ defmodule Bonfire.Data.Identity.Character do
     |> Changesets.cast(params, @cast)
     |> Changeset.validate_required(@required)
     |> Changeset.unique_constraint(:username)
-    |> cast_boxes(params)
+    |> put_boxes(params)
     # |> IO.inspect()
   end
   def changeset(char, params, :update) do
     char
-    # |> IO.inspect
     |> Changeset.cast(params, @cast)
-    # |> Changeset.cast_assoc(:outbox)
-    # |> Changeset.cast_assoc(:inbox)
-    # |> Changeset.cast_assoc(:notifications)
   end
   def changeset(char, params, :hash) do
     changeset(char, params, nil)
@@ -47,18 +44,15 @@ defmodule Bonfire.Data.Identity.Character do
     |> Changesets.replicate_map_valid_change(:username, :username_hash, &hash/1)
   end
 
-  defp cast_boxes(changeset, params) do
+  defp put_boxes(changeset, params) do
     if changeset.valid? do
       id = Changeset.get_field(changeset, :id)
-      boxes =
-        for key <- [:outbox, :inbox, :notifications], reduce: %{} do
-          acc ->
-            Map.put(acc, key, %{
-              id: ULID.generate(),
-              caretaker: %{caretaker_id: :id},
-            })
-        end
-      Changeset.cast(changeset, boxes, [])
+      debug(changeset, "changeset")
+      for key <- [:outbox, :inbox, :notifications], reduce: changeset do
+        changeset ->
+          Changesets.put_assoc(changeset, key, %{})
+          |> Changeset.update_change(key, &Changesets.put_assoc(&1, :caretaker, %Caretaker{caretaker_id: id}))
+      end
     else
       changeset
     end
