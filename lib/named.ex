@@ -1,6 +1,6 @@
 defmodule Bonfire.Data.Identity.Named do
   use Pointers.Mixin,
-    otp_app: :bonfire_data_social,
+    otp_app: :bonfire_data_identity,
     source: "bonfire_data_social_named"
 
   alias Bonfire.Data.Identity.Named
