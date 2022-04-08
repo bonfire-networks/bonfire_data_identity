@@ -15,10 +15,11 @@ defmodule Bonfire.Data.Identity.Credential do
 
   mixin_schema do
     field :password, :string, virtual: true, redact: true
+    field :password_confirmation, :string, virtual: true, redact: true
     field :password_hash, :string
   end
 
-  @cast     [:password]
+  @cast     [:password, :password_confirmation]
   @required [:password]
 
   def changeset(cred \\ %Credential{}, params) do
@@ -27,6 +28,13 @@ defmodule Bonfire.Data.Identity.Credential do
     |> Changeset.validate_required(@required)
     |> Changeset.validate_length(:password, min: 10, max: 64)
     |> Changesets.replicate_map_valid_change(:password, :password_hash, &hash_password/1)
+  end
+
+  def confirmation_changeset(cred \\ %Credential{}, params) do
+    cred
+    |> changeset(params)
+    |> Changeset.validate_required(:password_confirmation)
+    |> Changeset.validate_confirmation(:password)
   end
 
   @module Application.compile_env(:bonfire_data_identity, [__MODULE__, :hasher_module], Argon2)
