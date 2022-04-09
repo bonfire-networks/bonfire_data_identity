@@ -15,11 +15,10 @@ defmodule Bonfire.Data.Identity.Credential do
 
   mixin_schema do
     field :password, :string, virtual: true, redact: true
-    field :password_confirmation, :string, virtual: true, redact: true
     field :password_hash, :string
   end
 
-  @cast     [:password, :password_confirmation]
+  @cast     [:password]
   @required [:password]
 
   def changeset(cred \\ %Credential{}, params) do
@@ -33,7 +32,6 @@ defmodule Bonfire.Data.Identity.Credential do
   def confirmation_changeset(cred \\ %Credential{}, params) do
     cred
     |> changeset(params)
-    |> Changeset.validate_required(:password_confirmation)
     |> Changeset.validate_confirmation(:password)
   end
 
