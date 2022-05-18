@@ -10,7 +10,6 @@ defmodule Bonfire.Data.Identity.Account do
     source: "bonfire_data_identity_account"
 
   alias Bonfire.Data.Identity.{Account, Accounted}
-  alias Ecto.Changeset
   alias Pointers.Changesets
 
   virtual_schema do

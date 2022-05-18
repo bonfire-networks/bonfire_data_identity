@@ -7,14 +7,14 @@ defmodule Bonfire.Data.Identity.CareClosure do
 
   use Ecto.Schema
   import Ecto.Query, only: [from: 2]
-  alias Pointers.{Pointer, ULID}
+  alias Pointers.Pointer
   alias Bonfire.Data.Identity.CareClosure
 
   @primary_key false
   schema "bonfire_data_identity_care_closure" do
     belongs_to :branch_id, Pointer
     belongs_to :leaf_id, Pointer
-    field :path, {:array, ULID}
+    field :path, {:array, Pointers.ULID}
   end
 
   def by_branch(branch) when not is_list(branch), do: by_branch([branch])

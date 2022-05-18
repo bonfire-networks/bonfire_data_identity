@@ -7,7 +7,6 @@ defmodule Bonfire.Data.Identity.Credential do
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_credential"
 
-  import Where
   require Pointers.Changesets
   alias Bonfire.Data.Identity.Credential
   alias Ecto.Changeset

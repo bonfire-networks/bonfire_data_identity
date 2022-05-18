@@ -11,7 +11,7 @@ defmodule Bonfire.Data.Identity.Character do
   alias Bonfire.Data.Identity.{Caretaker, Character}
   alias Bonfire.Data.Social.Feed
   alias Ecto.Changeset
-  alias Pointers.{Changesets, Pointer, ULID}
+  alias Pointers.Changesets
   import Where
 
   mixin_schema do
@@ -44,7 +44,7 @@ defmodule Bonfire.Data.Identity.Character do
     |> Changesets.replicate_map_valid_change(:username, :username_hash, &hash/1)
   end
 
-  defp put_boxes(changeset, params) do
+  defp put_boxes(changeset, _params) do
     if changeset.valid? do
       id = Changeset.get_field(changeset, :id)
       debug(changeset, "changeset")
