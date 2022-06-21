@@ -26,7 +26,8 @@ defmodule Bonfire.Data.Identity.MixProject do
         # {:pointers, path: "../../../pointers"},
 #        {:argon2_elixir, "~> 2.3", optional: true},
         {:pbkdf2_elixir, "~> 1.4", only: :dev},
-        {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+        {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+        {:nimble_totp, "~> 0.2.0", optional: true}
       ])
     ]
   end
