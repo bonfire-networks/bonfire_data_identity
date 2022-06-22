@@ -25,6 +25,7 @@ A mixin that stores a second factor secret to authenticate an account.
   @required [:secret, :code]
 
   def changeset(%AuthSecondFactor{} = totp, attrs) do
+    debug(attrs)
     changeset =
       totp
       |> Ecto.Changeset.cast(attrs, @cast)
@@ -34,16 +35,16 @@ A mixin that stores a second factor secret to authenticate an account.
     code = Ecto.Changeset.get_field(changeset, :code)
 
     if changeset.valid? and not valid_totp?(totp, code) do
-      Ecto.Changeset.add_error(changeset, :code, "invalid code")
+      if not is_binary(totp.secret), do: Ecto.Changeset.add_error(changeset, :code, "invalid secret, please scan the QR code again"), else: Ecto.Changeset.add_error(changeset, :code, "invalid code")
     else
       changeset
     end
   end
 
   def valid_totp?(%AuthSecondFactor{} = totp, code) do
-    # debug(totp.secret)
-    # debug(code)
-    is_binary(code) and byte_size(code) == 6 and NimbleTOTP.valid?(totp.secret, code)
+    debug(totp.secret)
+    debug(code)
+    is_binary(totp.secret) and is_binary(code) and byte_size(code) == 6 and NimbleTOTP.valid?(totp.secret, code)
   end
 
   # def validate_backup_code(totp, code) when is_binary(code) do
