@@ -46,16 +46,24 @@ defmodule Bonfire.Data.Identity.Character do
 
   defp put_boxes(changeset, _params) do
     if changeset.valid? do
-      id = Changeset.get_field(changeset, :id)
-      debug(changeset, "changeset")
+      id = Changeset.get_field(changeset, :id) #|| raise "Character requires an ID to be set on the pointable." # FIXME
+      # debug(id, "changeset id")
       for key <- [:outbox, :inbox, :notifications], reduce: changeset do
         changeset ->
           Changesets.put_assoc(changeset, key, %{})
-          |> Changeset.update_change(key, &Changesets.put_assoc(&1, :caretaker, %Caretaker{caretaker_id: id}))
+          |> Changeset.update_change(key, &maybe_caretaker(&1, id))
       end
     else
       changeset
     end
+  end
+
+  defp maybe_caretaker(cs, id) when is_binary(id) do
+    Changesets.put_assoc(cs, :caretaker, %Caretaker{caretaker_id: id})
+  end
+  defp maybe_caretaker(cs, _) do
+    warn("The Character assocs are not being given a caretaker")
+    cs
   end
 
   def hash(name) do
