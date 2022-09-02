@@ -12,7 +12,7 @@ defmodule Bonfire.Data.Identity.Character do
   alias Bonfire.Data.Social.Feed
   alias Ecto.Changeset
   alias Pointers.Changesets
-  import Where
+  import Untangle
 
   mixin_schema do
     field :username, :string, redact: true

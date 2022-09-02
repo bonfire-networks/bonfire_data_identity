@@ -6,7 +6,7 @@ A mixin that stores a second factor secret to authenticate an account.
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_auth_second_factor"
 
-  import Where
+  import Untangle
   alias Bonfire.Data.Identity.AuthSecondFactor
   alias Ecto.Changeset
 
