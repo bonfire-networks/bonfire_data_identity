@@ -9,14 +9,16 @@ defmodule Bonfire.Data.Identity.Accounted do
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_accounted"
 
-  alias Bonfire.Data.Identity.{Account, Accounted}
+  alias Bonfire.Data.Identity.Account
+  alias Bonfire.Data.Identity.Accounted
+
   alias Ecto.Changeset
 
   mixin_schema do
-    belongs_to :account, Account
+    belongs_to(:account, Account)
   end
 
-  @cast     [:account_id]
+  @cast [:account_id]
   @required [:account_id]
 
   def changeset(acc \\ %Accounted{}, params) do
@@ -25,10 +27,9 @@ defmodule Bonfire.Data.Identity.Accounted do
     |> Changeset.validate_required(@required)
     |> Changeset.foreign_key_constraint(:account_id)
   end
-
 end
-defmodule Bonfire.Data.Identity.Accounted.Migration do
 
+defmodule Bonfire.Data.Identity.Accounted.Migration do
   import Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.Accounted
@@ -40,15 +41,18 @@ defmodule Bonfire.Data.Identity.Accounted.Migration do
   defp make_accounted_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Accounted) do
-        add :account_id, strong_pointer(), null: false 
+
+      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Accounted do
+        add(:account_id, strong_pointer(), null: false)
         unquote_splicing(exprs)
       end
     end
   end
 
   defmacro create_accounted_table(), do: make_accounted_table([])
-  defmacro create_accounted_table([do: {_, _, body}]), do: make_accounted_table(body)
+
+  defmacro create_accounted_table(do: {_, _, body}),
+    do: make_accounted_table(body)
 
   # drop_accounted_table/0
 
@@ -59,13 +63,19 @@ defmodule Bonfire.Data.Identity.Accounted.Migration do
   defp make_accounted_account_index(opts) do
     quote do
       Ecto.Migration.create_if_not_exists(
-        Ecto.Migration.index(unquote(@accounted_table), [:account_id], unquote(opts))
+        Ecto.Migration.index(
+          unquote(@accounted_table),
+          [:account_id],
+          unquote(opts)
+        )
       )
     end
   end
 
   defmacro create_accounted_account_index(opts \\ [])
-  defmacro create_accounted_account_index(opts), do: make_accounted_account_index(opts)
+
+  defmacro create_accounted_account_index(opts),
+    do: make_accounted_account_index(opts)
 
   def drop_accounted_account_index(opts \\ []) do
     drop_if_exists(index(@accounted_table, [:account_id], opts))
@@ -94,6 +104,6 @@ defmodule Bonfire.Data.Identity.Accounted.Migration do
         else: unquote(ma(:down))
     end
   end
-  defmacro migrate_accounted(dir), do: ma(dir)
 
+  defmacro migrate_accounted(dir), do: ma(dir)
 end

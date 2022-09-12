@@ -8,36 +8,41 @@ defmodule Bonfire.Data.Identity.Character do
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_character"
 
-  alias Bonfire.Data.Identity.{Caretaker, Character}
+  alias Bonfire.Data.Identity.Caretaker
+  alias Bonfire.Data.Identity.Character
+
   alias Bonfire.Data.Social.Feed
   alias Ecto.Changeset
   alias Pointers.Changesets
   import Untangle
 
   mixin_schema do
-    field :username, :string, redact: true
-    field :username_hash, :string, redact: true
-    belongs_to :outbox, Feed
-    belongs_to :inbox, Feed
-    belongs_to :notifications, Feed
+    field(:username, :string, redact: true)
+    field(:username_hash, :string, redact: true)
+    belongs_to(:outbox, Feed)
+    belongs_to(:inbox, Feed)
+    belongs_to(:notifications, Feed)
   end
 
-  @cast     [:username]
+  @cast [:username]
   @required [:username]
 
   def changeset(char \\ %Character{}, params, extra \\ nil)
+
   def changeset(char, params, nil) do
     char
     |> Changesets.cast(params, @cast)
     |> Changeset.validate_required(@required)
     |> Changeset.unique_constraint(:username)
     |> put_boxes(params)
+
     # |> IO.inspect()
   end
+
   def changeset(char, params, :update) do
-    char
-    |> Changeset.cast(params, @cast)
+    Changeset.cast(char, params, @cast)
   end
+
   def changeset(char, params, :hash) do
     changeset(char, params, nil)
     |> Changeset.unique_constraint(:username_hash)
@@ -46,7 +51,8 @@ defmodule Bonfire.Data.Identity.Character do
 
   defp put_boxes(changeset, _params) do
     if changeset.valid? do
-      id = Changeset.get_field(changeset, :id) #|| raise "Character requires an ID to be set on the pointable." # FIXME
+      # || raise "Character requires an ID to be set on the pointable." # FIXME
+      id = Changeset.get_field(changeset, :id)
       # debug(id, "changeset id")
       for key <- [:outbox, :inbox, :notifications], reduce: changeset do
         changeset ->
@@ -61,6 +67,7 @@ defmodule Bonfire.Data.Identity.Character do
   defp maybe_caretaker(cs, id) when is_binary(id) do
     Changesets.put_assoc(cs, :caretaker, %Caretaker{caretaker_id: id})
   end
+
   defp maybe_caretaker(cs, _) do
     warn("The Character assocs are not being given a caretaker")
     cs
@@ -86,11 +93,9 @@ defmodule Bonfire.Data.Identity.Character do
   defp fold("8"), do: "b"
   defp fold("i"), do: "l"
   defp fold("_"), do: ""
-
 end
 
 defmodule Bonfire.Data.Identity.Character.Migration do
-
   import Ecto.Migration
   alias Bonfire.Data.Identity.Character
 
@@ -101,13 +106,14 @@ defmodule Bonfire.Data.Identity.Character.Migration do
   defp make_character_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Character) do
-        Ecto.Migration.add :username, :citext
-        Ecto.Migration.add :username_hash, :citext
 
-        add :outbox_id, Pointers.Migration.weak_pointer()
-        add :inbox_id, Pointers.Migration.weak_pointer()
-        add :notifications_id, Pointers.Migration.weak_pointer()
+      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Character do
+        Ecto.Migration.add(:username, :citext)
+        Ecto.Migration.add(:username_hash, :citext)
+
+        add(:outbox_id, Pointers.Migration.weak_pointer())
+        add(:inbox_id, Pointers.Migration.weak_pointer())
+        add(:notifications_id, Pointers.Migration.weak_pointer())
 
         unquote_splicing(exprs)
       end
@@ -115,7 +121,9 @@ defmodule Bonfire.Data.Identity.Character.Migration do
   end
 
   defmacro create_character_table(), do: make_character_table([])
-  defmacro create_character_table([do: {_, _, body}]), do: make_character_table(body)
+
+  defmacro create_character_table(do: {_, _, body}),
+    do: make_character_table(body)
 
   # drop_character_table/0
 
@@ -126,13 +134,19 @@ defmodule Bonfire.Data.Identity.Character.Migration do
   defp make_character_username_index(opts) do
     quote do
       Ecto.Migration.create_if_not_exists(
-        Ecto.Migration.unique_index(unquote(@character_table), [:username], unquote(opts))
+        Ecto.Migration.unique_index(
+          unquote(@character_table),
+          [:username],
+          unquote(opts)
+        )
       )
     end
   end
 
   defmacro create_character_username_index(opts \\ [])
-  defmacro create_character_username_index(opts), do: make_character_username_index(opts)
+
+  defmacro create_character_username_index(opts),
+    do: make_character_username_index(opts)
 
   def drop_character_username_index(opts \\ []) do
     drop_if_exists(unique_index(@character_table, [:username], opts))
@@ -143,13 +157,19 @@ defmodule Bonfire.Data.Identity.Character.Migration do
   defp make_character_username_hash_index(opts) do
     quote do
       Ecto.Migration.create_if_not_exists(
-        Ecto.Migration.unique_index(unquote(@character_table), [:username_hash], unquote(opts))
+        Ecto.Migration.unique_index(
+          unquote(@character_table),
+          [:username_hash],
+          unquote(opts)
+        )
       )
     end
   end
 
   defmacro create_character_username_hash_index(opts \\ [])
-  defmacro create_character_username_hash_index(opts), do: make_character_username_hash_index(opts)
+
+  defmacro create_character_username_hash_index(opts),
+    do: make_character_username_hash_index(opts)
 
   def drop_character_username_hash_index(opts \\ []) do
     drop_if_exists(unique_index(@character_table, [:username_hash], opts))
@@ -190,7 +210,8 @@ defmodule Bonfire.Data.Identity.Character.Migration do
   end
 
   def create_character_trigger(opts \\ []) do
-    drop_character_trigger(opts) # because there is no create trigger if not exists
+    # because there is no create trigger if not exists
+    drop_character_trigger(opts)
     execute(@trigger_up)
   end
 
@@ -206,15 +227,21 @@ defmodule Bonfire.Data.Identity.Character.Migration do
       unquote(make_character_username_index([]))
       unquote(make_character_username_hash_index([]))
       Ecto.Migration.flush()
+
       Bonfire.Data.Identity.Character.Migration.create_character_trigger_function()
+
       Bonfire.Data.Identity.Character.Migration.create_character_trigger()
     end
   end
+
   defp mc(:down) do
     quote do
       Bonfire.Data.Identity.Character.Migration.drop_character_trigger()
+
       Bonfire.Data.Identity.Character.Migration.drop_character_trigger_function()
+
       Bonfire.Data.Identity.Character.Migration.drop_character_username_hash_index()
+
       Bonfire.Data.Identity.Character.Migration.drop_character_username_index()
       Bonfire.Data.Identity.Character.Migration.drop_character_table()
     end
@@ -227,6 +254,6 @@ defmodule Bonfire.Data.Identity.Character.Migration do
         else: unquote(mc(:down))
     end
   end
-  defmacro migrate_character(dir), do: mc(dir)
 
+  defmacro migrate_character(dir), do: mc(dir)
 end

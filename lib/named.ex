@@ -7,7 +7,7 @@ defmodule Bonfire.Data.Identity.Named do
   alias Ecto.Changeset
 
   mixin_schema do
-    field :name, :string
+    field(:name, :string)
   end
 
   @cast [:name]
@@ -15,7 +15,6 @@ defmodule Bonfire.Data.Identity.Named do
   def changeset(named \\ %Named{}, params, _opts \\ []) do
     Changeset.cast(named, params, @cast)
   end
-
 end
 
 defmodule Bonfire.Data.Identity.Named.Migration do
@@ -28,15 +27,16 @@ defmodule Bonfire.Data.Identity.Named.Migration do
   defp make_named_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Named) do
-        Ecto.Migration.add :name, :text
+
+      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Named do
+        Ecto.Migration.add(:name, :text)
         unquote_splicing(exprs)
       end
     end
   end
 
   defmacro create_named_table(), do: make_named_table([])
-  defmacro create_named_table([do: {_, _, body}]), do: make_named_table(body)
+  defmacro create_named_table(do: {_, _, body}), do: make_named_table(body)
 
   # drop_named_table/0
 
@@ -59,6 +59,6 @@ defmodule Bonfire.Data.Identity.Named.Migration do
         else: unquote(mn(:down))
     end
   end
-  defmacro migrate_named(dir), do: mn(dir)
 
+  defmacro migrate_named(dir), do: mn(dir)
 end

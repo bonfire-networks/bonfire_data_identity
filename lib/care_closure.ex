@@ -12,30 +12,32 @@ defmodule Bonfire.Data.Identity.CareClosure do
 
   @primary_key false
   schema "bonfire_data_identity_care_closure" do
-    belongs_to :branch_id, Pointer
-    belongs_to :leaf_id, Pointer
-    field :path, {:array, Pointers.ULID}
+    belongs_to(:branch_id, Pointer)
+    belongs_to(:leaf_id, Pointer)
+    field(:path, {:array, Pointers.ULID})
   end
 
   def by_branch(branch) when not is_list(branch), do: by_branch([branch])
+
   def by_branch(branches) do
     branches = Enum.map(branches, &id!/1)
-    from p in Pointer,
+
+    from(p in Pointer,
       join: cc in CareClosure,
       on: p.id == cc.leaf_id and cc.branch_id in ^branches
+    )
   end
 
   defp id!(id) when is_binary(id), do: id
   defp id!(%{id: id}), do: id
-
 end
-defmodule Bonfire.Data.Identity.CareClosure.Migration do
 
+defmodule Bonfire.Data.Identity.CareClosure.Migration do
   import Ecto.Migration
   alias Pointers.Pointer
   alias Bonfire.Data.Identity.Caretaker
 
-  @pointer_table   Pointer.__schema__(:source)
+  @pointer_table Pointer.__schema__(:source)
   @caretaker_table Caretaker.__schema__(:source)
 
   # migrate_care_closure_view/0
@@ -72,5 +74,4 @@ defmodule Bonfire.Data.Identity.CareClosure.Migration do
   """
 
   def migrate_care_closure_view(), do: execute(@create_view, @drop_view)
-
 end

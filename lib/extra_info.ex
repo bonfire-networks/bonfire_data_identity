@@ -7,8 +7,8 @@ defmodule Bonfire.Data.Identity.ExtraInfo do
   alias Ecto.Changeset
 
   mixin_schema do
-    field :summary, :string
-    field :info, :map
+    field(:summary, :string)
+    field(:info, :map)
   end
 
   @cast [:summary, :info]
@@ -16,7 +16,6 @@ defmodule Bonfire.Data.Identity.ExtraInfo do
   def changeset(extra_info \\ %ExtraInfo{}, params, _opts \\ []) do
     Changeset.cast(extra_info, params, @cast)
   end
-
 end
 
 defmodule Bonfire.Data.Identity.ExtraInfo.Migration do
@@ -29,16 +28,19 @@ defmodule Bonfire.Data.Identity.ExtraInfo.Migration do
   defp make_extra_info_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.ExtraInfo) do
-        Ecto.Migration.add :summary, :text
-        Ecto.Migration.add :info, :jsonb
+
+      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.ExtraInfo do
+        Ecto.Migration.add(:summary, :text)
+        Ecto.Migration.add(:info, :jsonb)
         unquote_splicing(exprs)
       end
     end
   end
 
   defmacro create_extra_info_table(), do: make_extra_info_table([])
-  defmacro create_extra_info_table([do: {_, _, body}]), do: make_extra_info_table(body)
+
+  defmacro create_extra_info_table(do: {_, _, body}),
+    do: make_extra_info_table(body)
 
   # drop_extra_info_table/0
 
@@ -61,6 +63,6 @@ defmodule Bonfire.Data.Identity.ExtraInfo.Migration do
         else: unquote(mn(:down))
     end
   end
-  defmacro migrate_extra_info(dir), do: mn(dir)
 
+  defmacro migrate_extra_info(dir), do: mn(dir)
 end

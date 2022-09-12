@@ -1,5 +1,4 @@
 defmodule Bonfire.Data.Identity.Self do
-
   use Pointers.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_self"
@@ -9,11 +8,11 @@ defmodule Bonfire.Data.Identity.Self do
   alias Ecto.Changeset
 
   mixin_schema do
-    belongs_to :self_acl, Acl
-    belongs_to :admin_acl, Acl
+    belongs_to(:self_acl, Acl)
+    belongs_to(:admin_acl, Acl)
   end
 
-  @cast     [:self_acl, :admin_acl]
+  @cast [:self_acl, :admin_acl]
   @required [:self_acl, :admin_acl]
 
   def changeset(self \\ %Self{}, params) do
@@ -23,10 +22,9 @@ defmodule Bonfire.Data.Identity.Self do
     |> Changeset.assoc_constraint(:self_acl)
     |> Changeset.assoc_constraint(:admin_acl)
   end
-
 end
-defmodule Bonfire.Data.Identity.Self.Migration do
 
+defmodule Bonfire.Data.Identity.Self.Migration do
   use Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.Self
@@ -36,18 +34,27 @@ defmodule Bonfire.Data.Identity.Self.Migration do
   defp make_self_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Self) do
-        Ecto.Migration.add :self_acl_id,
-          Pointers.Migration.strong_pointer(Bonfire.Data.AccessControl.Acl), null: false
-        Ecto.Migration.add :admin_acl_id,
-          Pointers.Migration.strong_pointer(Bonfire.Data.AccessControl.Acl), null: false
+
+      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Self do
+        Ecto.Migration.add(
+          :self_acl_id,
+          Pointers.Migration.strong_pointer(Bonfire.Data.AccessControl.Acl),
+          null: false
+        )
+
+        Ecto.Migration.add(
+          :admin_acl_id,
+          Pointers.Migration.strong_pointer(Bonfire.Data.AccessControl.Acl),
+          null: false
+        )
+
         unquote_splicing(exprs)
       end
     end
   end
 
   defmacro create_self_table(), do: make_self_table([])
-  defmacro create_self_table([do: {_, _, body}]), do: make_self_table(body)
+  defmacro create_self_table(do: {_, _, body}), do: make_self_table(body)
 
   # drop_self_table/0
 
@@ -68,6 +75,6 @@ defmodule Bonfire.Data.Identity.Self.Migration do
         else: unquote(ms(:down))
     end
   end
-  defmacro migrate_self(dir), do: ms(dir)
 
+  defmacro migrate_self(dir), do: ms(dir)
 end

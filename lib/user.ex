@@ -17,10 +17,9 @@ defmodule Bonfire.Data.Identity.User do
   end
 
   def changeset(user \\ %User{}, params), do: Changesets.cast(user, params, [])
-
 end
-defmodule Bonfire.Data.Identity.User.Migration do
 
+defmodule Bonfire.Data.Identity.User.Migration do
   use Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.User
@@ -55,6 +54,6 @@ defmodule Bonfire.Data.Identity.User.Migration do
         else: unquote(mu(:down))
     end
   end
-  defmacro migrate_user(dir), do: mu(dir)
 
+  defmacro migrate_user(dir), do: mu(dir)
 end

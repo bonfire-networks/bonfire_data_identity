@@ -9,18 +9,20 @@ defmodule Bonfire.Data.Identity.Account do
     table_id: "2CC0VNTSARE1S01AT10NGR0VPS",
     source: "bonfire_data_identity_account"
 
-  alias Bonfire.Data.Identity.{Account, Accounted}
+  alias Bonfire.Data.Identity.Account
+  alias Bonfire.Data.Identity.Accounted
+
   alias Pointers.Changesets
 
   virtual_schema do
-    has_many :accounted, Accounted, foreign_key: :account_id
+    has_many(:accounted, Accounted, foreign_key: :account_id)
   end
 
-  def changeset(account \\ %Account{}, params), do: Changesets.cast(account, params, [])
-
+  def changeset(account \\ %Account{}, params),
+    do: Changesets.cast(account, params, [])
 end
-defmodule Bonfire.Data.Identity.Account.Migration do
 
+defmodule Bonfire.Data.Identity.Account.Migration do
   use Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.Account
@@ -55,6 +57,6 @@ defmodule Bonfire.Data.Identity.Account.Migration do
         else: unquote(ma(:down))
     end
   end
-  defmacro migrate_account(dir), do: ma(dir)
 
+  defmacro migrate_account(dir), do: ma(dir)
 end

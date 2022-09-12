@@ -13,11 +13,11 @@ defmodule Bonfire.Data.Identity.Credential do
   alias Pointers.Changesets
 
   mixin_schema do
-    field :password, :string, virtual: true, redact: true
-    field :password_hash, :string
+    field(:password, :string, virtual: true, redact: true)
+    field(:password_hash, :string)
   end
 
-  @cast     [:password]
+  @cast [:password]
   @required [:password]
 
   def changeset(cred \\ %Credential{}, params) do
@@ -25,7 +25,11 @@ defmodule Bonfire.Data.Identity.Credential do
     |> Changeset.cast(params, @cast)
     |> Changeset.validate_required(@required)
     |> Changeset.validate_length(:password, min: 10, max: 64)
-    |> Changesets.replicate_map_valid_change(:password, :password_hash, &hash_password/1)
+    |> Changesets.replicate_map_valid_change(
+      :password,
+      :password_hash,
+      &hash_password/1
+    )
   end
 
   def confirmation_changeset(cred \\ %Credential{}, params) do
@@ -34,15 +38,18 @@ defmodule Bonfire.Data.Identity.Credential do
     |> Changeset.validate_confirmation(:password)
   end
 
-  @module Application.compile_env(:bonfire_data_identity, [__MODULE__, :hasher_module], Argon2)
+  @module Application.compile_env(
+            :bonfire_data_identity,
+            [__MODULE__, :hasher_module],
+            Argon2
+          )
 
   def hash_password(password), do: @module.hash_pwd_salt(password)
   def check_password(password, hash), do: @module.verify_pass(password, hash)
   def dummy_check(), do: @module.no_user_verify()
-
 end
-defmodule Bonfire.Data.Identity.Credential.Migration do
 
+defmodule Bonfire.Data.Identity.Credential.Migration do
   # import Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.Credential
@@ -54,15 +61,18 @@ defmodule Bonfire.Data.Identity.Credential.Migration do
   defp make_credential_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Credential) do
-        Ecto.Migration.add :password_hash, :text, null: false
+
+      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Credential do
+        Ecto.Migration.add(:password_hash, :text, null: false)
         unquote_splicing(exprs)
       end
     end
   end
 
   defmacro create_credential_table(), do: make_credential_table([])
-  defmacro create_credential_table([do: {_, _, body}]), do: make_credential_table(body)
+
+  defmacro create_credential_table(do: {_, _, body}),
+    do: make_credential_table(body)
 
   # drop_credential_table/0
 
@@ -85,6 +95,6 @@ defmodule Bonfire.Data.Identity.Credential.Migration do
         else: unquote(mc(:down))
     end
   end
-  defmacro migrate_credential(dir), do: mc(dir)
 
+  defmacro migrate_credential(dir), do: mc(dir)
 end

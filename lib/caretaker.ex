@@ -18,10 +18,10 @@ defmodule Bonfire.Data.Identity.Caretaker do
   alias Ecto.Changeset
 
   mixin_schema do
-    belongs_to :caretaker, Pointer
+    belongs_to(:caretaker, Pointer)
   end
 
-  @cast     [:caretaker_id]
+  @cast [:caretaker_id]
   @required [:caretaker_id]
 
   def changeset(ct \\ %Caretaker{}, params, _opts \\ []) do
@@ -30,10 +30,9 @@ defmodule Bonfire.Data.Identity.Caretaker do
     |> Changeset.validate_required(@required)
     |> Changeset.foreign_key_constraint(:caretaker_id)
   end
-
 end
-defmodule Bonfire.Data.Identity.Caretaker.Migration do
 
+defmodule Bonfire.Data.Identity.Caretaker.Migration do
   import Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.Caretaker
@@ -45,16 +44,23 @@ defmodule Bonfire.Data.Identity.Caretaker.Migration do
   defp make_caretaker_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Caretaker) do
-        add :caretaker_id,
-          Pointers.Migration.strong_pointer(), null: false
+
+      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Caretaker do
+        add(
+          :caretaker_id,
+          Pointers.Migration.strong_pointer(),
+          null: false
+        )
+
         unquote_splicing(exprs)
       end
     end
   end
 
   defmacro create_caretaker_table(), do: make_caretaker_table([])
-  defmacro create_caretaker_table([do: {_, _, body}]), do: make_caretaker_table(body)
+
+  defmacro create_caretaker_table(do: {_, _, body}),
+    do: make_caretaker_table(body)
 
   # drop_caretaker_table/0
 
@@ -65,13 +71,19 @@ defmodule Bonfire.Data.Identity.Caretaker.Migration do
   defp make_caretaker_caretaker_index(opts) do
     quote do
       Ecto.Migration.create_if_not_exists(
-        Ecto.Migration.index(unquote(@caretaker_table), [:caretaker_id], unquote(opts))
+        Ecto.Migration.index(
+          unquote(@caretaker_table),
+          [:caretaker_id],
+          unquote(opts)
+        )
       )
     end
   end
 
   defmacro create_caretaker_caretaker_index(opts \\ [])
-  defmacro create_caretaker_caretaker_index(opts), do: make_caretaker_caretaker_index(opts)
+
+  defmacro create_caretaker_caretaker_index(opts),
+    do: make_caretaker_caretaker_index(opts)
 
   def drop_caretaker_caretaker_index(opts \\ []) do
     drop_if_exists(index(@caretaker_table, [:caretaker_id], opts))
@@ -100,6 +112,6 @@ defmodule Bonfire.Data.Identity.Caretaker.Migration do
         else: unquote(mc(:down))
     end
   end
-  defmacro migrate_caretaker(dir), do: mc(dir)
 
+  defmacro migrate_caretaker(dir), do: mc(dir)
 end

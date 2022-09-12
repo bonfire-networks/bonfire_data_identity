@@ -1,7 +1,7 @@
 defmodule Bonfire.Data.Identity.Settings do
-@moduledoc """
-A mixin that stores settings (of the instance, account, user, etc) as an Erlang Term (typically a map or keyword list) encoded to binary.
-"""
+  @moduledoc """
+  A mixin that stores settings (of the instance, account, user, etc) as an Erlang Term (typically a map or keyword list) encoded to binary.
+  """
   use Pointers.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_settings"
@@ -10,7 +10,7 @@ A mixin that stores settings (of the instance, account, user, etc) as an Erlang 
   alias Ecto.Changeset
 
   mixin_schema do
-    field :data, EctoSparkles.ErlangTermBinary
+    field(:data, EctoSparkles.ErlangTermBinary)
   end
 
   @cast [:id, :data]
@@ -18,7 +18,6 @@ A mixin that stores settings (of the instance, account, user, etc) as an Erlang 
   def changeset(settings \\ %Settings{}, params, _opts \\ []) do
     Changeset.cast(settings, params, @cast)
   end
-
 end
 
 defmodule Bonfire.Data.Identity.Settings.Migration do
@@ -31,15 +30,18 @@ defmodule Bonfire.Data.Identity.Settings.Migration do
   defp make_settings_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.Settings) do
-        Ecto.Migration.add :data, :binary, null: true
+
+      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Settings do
+        Ecto.Migration.add(:data, :binary, null: true)
         unquote_splicing(exprs)
       end
     end
   end
 
   defmacro create_settings_table(), do: make_settings_table([])
-  defmacro create_settings_table([do: {_, _, body}]), do: make_settings_table(body)
+
+  defmacro create_settings_table(do: {_, _, body}),
+    do: make_settings_table(body)
 
   # drop_settings_table/0
 
@@ -62,6 +64,6 @@ defmodule Bonfire.Data.Identity.Settings.Migration do
         else: unquote(mn(:down))
     end
   end
-  defmacro migrate_settings(dir), do: mn(dir)
 
+  defmacro migrate_settings(dir), do: mn(dir)
 end

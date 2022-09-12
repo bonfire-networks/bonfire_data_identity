@@ -1,7 +1,7 @@
 defmodule Bonfire.Data.Identity.AuthSecondFactor do
-@moduledoc """
-A mixin that stores a second factor secret to authenticate an account.
-"""
+  @moduledoc """
+  A mixin that stores a second factor secret to authenticate an account.
+  """
   use Pointers.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_auth_second_factor"
@@ -11,8 +11,8 @@ A mixin that stores a second factor secret to authenticate an account.
   alias Ecto.Changeset
 
   mixin_schema do
-    field :secret, :binary
-    field :code, :string, virtual: true
+    field(:secret, :binary)
+    field(:code, :string, virtual: true)
 
     # TODO: implement backup codes
     # embeds_many :backup_codes, BackupCode, on_replace: :delete do
@@ -26,6 +26,7 @@ A mixin that stores a second factor secret to authenticate an account.
 
   def changeset(%AuthSecondFactor{} = totp, attrs) do
     debug(attrs)
+
     changeset =
       totp
       |> Ecto.Changeset.cast(attrs, @cast)
@@ -35,7 +36,14 @@ A mixin that stores a second factor secret to authenticate an account.
     code = Ecto.Changeset.get_field(changeset, :code)
 
     if changeset.valid? and not valid_totp?(totp, code) do
-      if not is_binary(totp.secret), do: Ecto.Changeset.add_error(changeset, :code, "invalid secret, please scan the QR code again"), else: Ecto.Changeset.add_error(changeset, :code, "invalid code")
+      if not is_binary(totp.secret),
+        do:
+          Ecto.Changeset.add_error(
+            changeset,
+            :code,
+            "invalid secret, please scan the QR code again"
+          ),
+        else: Ecto.Changeset.add_error(changeset, :code, "invalid code")
     else
       changeset
     end
@@ -44,7 +52,9 @@ A mixin that stores a second factor secret to authenticate an account.
   def valid_totp?(%AuthSecondFactor{} = totp, code) do
     debug(totp.secret)
     debug(code)
-    is_binary(totp.secret) and is_binary(code) and byte_size(code) == 6 and NimbleTOTP.valid?(totp.secret, code)
+
+    is_binary(totp.secret) and is_binary(code) and byte_size(code) == 6 and
+      NimbleTOTP.valid?(totp.secret, code)
   end
 
   # def validate_backup_code(totp, code) when is_binary(code) do
@@ -94,7 +104,6 @@ A mixin that stores a second factor secret to authenticate an account.
   #     %BackupCode{code: code}
   #   end
   # end
-
 end
 
 defmodule Bonfire.Data.Identity.AuthSecondFactor.Migration do
@@ -107,15 +116,19 @@ defmodule Bonfire.Data.Identity.AuthSecondFactor.Migration do
   defp make_auth_second_factor_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Data.Identity.AuthSecondFactor) do
-        Ecto.Migration.add :secret, :binary, null: false
+
+      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.AuthSecondFactor do
+        Ecto.Migration.add(:secret, :binary, null: false)
         unquote_splicing(exprs)
       end
     end
   end
 
-  defmacro create_auth_second_factor_table(), do: make_auth_second_factor_table([])
-  defmacro create_auth_second_factor_table([do: {_, _, body}]), do: make_auth_second_factor_table(body)
+  defmacro create_auth_second_factor_table(),
+    do: make_auth_second_factor_table([])
+
+  defmacro create_auth_second_factor_table(do: {_, _, body}),
+    do: make_auth_second_factor_table(body)
 
   # drop_auth_second_factor_table/0
 
@@ -138,6 +151,6 @@ defmodule Bonfire.Data.Identity.AuthSecondFactor.Migration do
         else: unquote(mn(:down))
     end
   end
-  defmacro migrate_auth_second_factor(dir), do: mn(dir)
 
+  defmacro migrate_auth_second_factor(dir), do: mn(dir)
 end
