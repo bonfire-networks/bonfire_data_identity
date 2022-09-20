@@ -15,7 +15,13 @@ defmodule Bonfire.Data.Identity.Settings do
 
   @cast [:id, :data]
 
-  def changeset(settings \\ %Settings{}, params, _opts \\ []) do
+  def changeset(settings \\ %Settings{}, params, opts \\ [])
+
+  def changeset(%Settings{id: _} = settings, params, _opts) do
+    Changeset.cast(settings, params, [:data])
+  end
+
+  def changeset(settings, params, _opts) do
     Changeset.cast(settings, params, @cast)
   end
 end
