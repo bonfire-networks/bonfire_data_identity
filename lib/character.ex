@@ -56,7 +56,7 @@ defmodule Bonfire.Data.Identity.Character do
       # debug(id, "changeset id")
       for key <- [:outbox, :inbox, :notifications], reduce: changeset do
         changeset ->
-          Changesets.put_assoc(changeset, key, %{})
+          Changesets.put_assoc!(changeset, key, %{})
           |> Changeset.update_change(key, &maybe_caretaker(&1, id))
       end
     else
@@ -65,7 +65,7 @@ defmodule Bonfire.Data.Identity.Character do
   end
 
   defp maybe_caretaker(cs, id) when is_binary(id) do
-    Changesets.put_assoc(cs, :caretaker, %Caretaker{caretaker_id: id})
+    Changesets.put_assoc!(cs, :caretaker, %Caretaker{caretaker_id: id})
   end
 
   defp maybe_caretaker(cs, _) do
