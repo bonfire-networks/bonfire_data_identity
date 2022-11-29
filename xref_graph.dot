@@ -1,0 +1,19 @@
+digraph "xref graph" {
+  "lib/account.ex"
+  "lib/account.ex" -> "lib/accounted.ex"
+  "lib/accounted.ex" -> "lib/account.ex"
+  "lib/accounted.ex"
+  "lib/auth_credential.ex"
+  "lib/auth_second_factor.ex"
+  "lib/care_closure.ex"
+  "lib/care_closure.ex" -> "lib/caretaker.ex" [label="(compile)"]
+  "lib/caretaker.ex"
+  "lib/character.ex"
+  "lib/character.ex" -> "lib/caretaker.ex" [label="(export)"]
+  "lib/email.ex"
+  "lib/extra_info.ex"
+  "lib/named.ex"
+  "lib/self.ex"
+  "lib/settings.ex"
+  "lib/user.ex"
+}
