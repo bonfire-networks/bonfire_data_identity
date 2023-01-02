@@ -20,6 +20,7 @@ defmodule Bonfire.Data.Identity.Settings do
   def changeset(%Settings{id: _} = settings, params, _opts) do
     # [:data])
     Changeset.cast(settings, params, @cast)
+    # |> Changeset.unique_constraint(:id, name: :bonfire_data_identity_settings_pkey)
   end
 
   def changeset(settings, params, _opts) do
