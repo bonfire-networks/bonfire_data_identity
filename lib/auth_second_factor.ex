@@ -8,7 +8,7 @@ defmodule Bonfire.Data.Identity.AuthSecondFactor do
 
   import Untangle
   alias Bonfire.Data.Identity.AuthSecondFactor
-  alias Ecto.Changeset
+  # alias Ecto.Changeset
 
   mixin_schema do
     field(:secret, :binary)
