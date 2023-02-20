@@ -33,6 +33,7 @@ defmodule Bonfire.Data.Identity.CareClosure do
 end
 
 defmodule Bonfire.Data.Identity.CareClosure.Migration do
+  @moduledoc false
   import Ecto.Migration
   alias Pointers.Pointer
   alias Bonfire.Data.Identity.Caretaker

@@ -96,6 +96,7 @@ defmodule Bonfire.Data.Identity.Character do
 end
 
 defmodule Bonfire.Data.Identity.Character.Migration do
+  @moduledoc false
   import Ecto.Migration
   alias Bonfire.Data.Identity.Character
 

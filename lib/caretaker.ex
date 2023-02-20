@@ -33,6 +33,7 @@ defmodule Bonfire.Data.Identity.Caretaker do
 end
 
 defmodule Bonfire.Data.Identity.Caretaker.Migration do
+  @moduledoc false
   import Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.Caretaker

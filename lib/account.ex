@@ -23,6 +23,7 @@ defmodule Bonfire.Data.Identity.Account do
 end
 
 defmodule Bonfire.Data.Identity.Account.Migration do
+  @moduledoc false
   use Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.Account

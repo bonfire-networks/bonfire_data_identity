@@ -107,6 +107,7 @@ defmodule Bonfire.Data.Identity.AuthSecondFactor do
 end
 
 defmodule Bonfire.Data.Identity.AuthSecondFactor.Migration do
+  @moduledoc false
   use Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.AuthSecondFactor

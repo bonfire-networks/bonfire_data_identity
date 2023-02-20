@@ -20,6 +20,7 @@ defmodule Bonfire.Data.Identity.User do
 end
 
 defmodule Bonfire.Data.Identity.User.Migration do
+  @moduledoc false
   use Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.User

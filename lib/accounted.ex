@@ -30,6 +30,7 @@ defmodule Bonfire.Data.Identity.Accounted do
 end
 
 defmodule Bonfire.Data.Identity.Accounted.Migration do
+  @moduledoc false
   import Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.Accounted

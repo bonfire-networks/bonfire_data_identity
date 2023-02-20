@@ -129,6 +129,7 @@ defmodule Bonfire.Data.Identity.Email do
 end
 
 defmodule Bonfire.Data.Identity.Email.Migration do
+  @moduledoc false
   import Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Data.Identity.Email
