@@ -17,6 +17,9 @@ defmodule Bonfire.Data.Identity.User do
   end
 
   def changeset(user \\ %User{}, params), do: Changesets.cast(user, params, [])
+
+  def maybe_redact(:prod), do: true
+  def maybe_redact(_), do: false
 end
 
 defmodule Bonfire.Data.Identity.User.Migration do
