@@ -17,7 +17,10 @@ defmodule Bonfire.Data.Identity.Character do
   import Untangle
 
   mixin_schema do
-    field(:username, :string, redact: true)
+    field(:username, :string,
+      redact: Bonfire.Data.Identity.User.maybe_redact(Application.get_env(:bonfire, :env))
+    )
+
     field(:username_hash, :string, redact: true)
     belongs_to(:outbox, Feed)
     belongs_to(:inbox, Feed)
