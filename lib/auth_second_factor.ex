@@ -33,7 +33,7 @@ defmodule Bonfire.Data.Identity.AuthSecondFactor do
       |> Ecto.Changeset.validate_required(@required)
       |> Ecto.Changeset.validate_format(:code, ~r/^\d{6}$/, message: "should be a 6 digit number")
 
-    code = Ecto.Changeset.get_field(changeset, :code)
+    code = Pointers.Changesets.get_field(changeset, :code)
 
     if changeset.valid? and not valid_totp?(totp, code) do
       if not is_binary(totp.secret),
@@ -84,7 +84,7 @@ defmodule Bonfire.Data.Identity.AuthSecondFactor do
   # end
 
   # def ensure_backup_codes(changeset) do
-  #   case Ecto.Changeset.get_field(changeset, :backup_codes) do
+  #   case Pointers.Changesets.get_field(changeset, :backup_codes) do
   #     [] -> regenerate_backup_codes(changeset)
   #     _ -> changeset
   #   end

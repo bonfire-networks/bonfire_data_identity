@@ -55,7 +55,7 @@ defmodule Bonfire.Data.Identity.Character do
   defp put_boxes(changeset, _params) do
     if changeset.valid? do
       # || raise "Character requires an ID to be set on the pointable." # FIXME
-      id = Changeset.get_field(changeset, :id)
+      id = Pointers.Changesets.get_field(changeset, :id)
       # debug(id, "changeset id")
       for key <- [:outbox, :inbox, :notifications], reduce: changeset do
         changeset ->
