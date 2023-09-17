@@ -16,7 +16,7 @@ defmodule Bonfire.Data.Identity.User do
   virtual_schema do
   end
 
-  def changeset(user \\ %User{}, params), do: Changesets.cast(user, params, [])
+  def changeset(user \\ %User{}, params), do: Changesets.cast(user, params, [:id])
 
   def maybe_redact(:prod), do: true
   def maybe_redact(_), do: false
