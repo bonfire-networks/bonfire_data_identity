@@ -39,7 +39,7 @@ defmodule Bonfire.Data.Identity.MixProject do
       deps:
         Mess.deps([
           # {:pointers, path: "../../../pointers"},
-          #        {:argon2_elixir, "~> 3.0", optional: true},
+          #        {:argon2_elixir, "~> 4.0", optional: true},
           {:pbkdf2_elixir, "~> 2.0", only: [:dev, :test]},
           {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
           {:nimble_totp, "~> 1.0.0", optional: true}
