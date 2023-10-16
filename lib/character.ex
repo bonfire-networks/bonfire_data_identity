@@ -30,11 +30,20 @@ defmodule Bonfire.Data.Identity.Character do
   @cast [:username]
   @required [:username]
 
+  def changeset_basic(char, params) do
+    error(params)
+
+    char
+    |> debug()
+    |> Changeset.cast(params, @cast)
+
+    # |> Changesets.cast_assoc(:actor)
+  end
+
   def changeset(char \\ %Character{}, params, extra \\ nil)
 
   def changeset(char, params, nil) do
-    char
-    |> Changesets.cast(params, @cast)
+    changeset_basic(char, params)
     |> Changeset.validate_required(@required)
     |> Changeset.unique_constraint(:username)
     |> put_boxes(params)
@@ -43,7 +52,7 @@ defmodule Bonfire.Data.Identity.Character do
   end
 
   def changeset(char, params, :update) do
-    Changeset.cast(char, params, @cast)
+    changeset_basic(char, params)
   end
 
   def changeset(char, params, :hash) do
@@ -53,7 +62,7 @@ defmodule Bonfire.Data.Identity.Character do
   end
 
   defp put_boxes(changeset, _params) do
-    if changeset.valid? do
+    if changeset.valid? and changeset.data.__meta__.state == :built do
       # || raise "Character requires an ID to be set on the pointable." # FIXME
       id = Pointers.Changesets.get_field(changeset, :id)
       # debug(id, "changeset id")
