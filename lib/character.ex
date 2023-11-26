@@ -31,7 +31,7 @@ defmodule Bonfire.Data.Identity.Character do
   @required [:username]
 
   def changeset_basic(char, params) do
-    error(params)
+    # debug(params)
 
     char
     |> debug()
