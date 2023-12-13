@@ -11,9 +11,10 @@ defmodule Bonfire.Data.Identity.Settings do
 
   mixin_schema do
     field(:data, EctoSparkles.ErlangTermBinary)
+    field(:json, :map)
   end
 
-  @cast [:id, :data]
+  @cast [:id, :data, :json]
 
   def changeset(settings \\ %Settings{}, params, opts \\ [])
 
@@ -42,6 +43,7 @@ defmodule Bonfire.Data.Identity.Settings.Migration do
 
       Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Settings do
         Ecto.Migration.add(:data, :binary, null: true)
+        Ecto.Migration.add(:json, :jsonb)
         unquote_splicing(exprs)
       end
     end
