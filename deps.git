@@ -1,4 +1,3 @@
-pointers = "https://github.com/bonfire-networks/pointers#main"
 untangle = "https://github.com/bonfire-networks/untangle#main"
 ecto_sparkles = "https://github.com/bonfire-networks/ecto_sparkles#main"
 bonfire_data_edges = "https://github.com/bonfire-networks/bonfire_data_edges#main"

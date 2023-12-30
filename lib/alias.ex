@@ -1,12 +1,12 @@
 defmodule Bonfire.Data.Identity.Alias do
-  use Pointers.Virtual,
+  use Needle.Virtual,
     otp_app: :bonfire_data_social,
     table_id: "7NA11ASA1S0KN0WNASFACESWAP",
     source: "bonfire_data_social_alias"
 
   alias Bonfire.Data.Edges.Edge
   alias Bonfire.Data.Identity.Alias
-  alias Pointers.Changesets
+  alias Needle.Changesets
 
   virtual_schema do
     has_one(:edge, Edge, foreign_key: :id)
@@ -19,7 +19,7 @@ end
 defmodule Bonfire.Data.Identity.Alias.Migration do
   @moduledoc false
   import Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   import Bonfire.Data.Edges.Edge.Migration
   alias Bonfire.Data.Identity.Alias
 

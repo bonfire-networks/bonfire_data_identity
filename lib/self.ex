@@ -1,5 +1,5 @@
 defmodule Bonfire.Data.Identity.Self do
-  use Pointers.Mixin,
+  use Needle.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_self"
 
@@ -27,25 +27,25 @@ end
 defmodule Bonfire.Data.Identity.Self.Migration do
   @moduledoc false
   use Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   alias Bonfire.Data.Identity.Self
 
   # create_self_table/{0,1}
 
   defp make_self_table(exprs) do
     quote do
-      require Pointers.Migration
+      require Needle.Migration
 
-      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Self do
+      Needle.Migration.create_mixin_table Bonfire.Data.Identity.Self do
         Ecto.Migration.add(
           :self_acl_id,
-          Pointers.Migration.strong_pointer(Bonfire.Data.AccessControl.Acl),
+          Needle.Migration.strong_pointer(Bonfire.Data.AccessControl.Acl),
           null: false
         )
 
         Ecto.Migration.add(
           :admin_acl_id,
-          Pointers.Migration.strong_pointer(Bonfire.Data.AccessControl.Acl),
+          Needle.Migration.strong_pointer(Bonfire.Data.AccessControl.Acl),
           null: false
         )
 

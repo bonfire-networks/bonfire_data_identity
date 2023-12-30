@@ -9,12 +9,12 @@ defmodule Bonfire.Data.Identity.Caretaker do
      ACLs created to permit people mentioned special permissions
   """
 
-  use Pointers.Mixin,
+  use Needle.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_caretaker"
 
   alias Bonfire.Data.Identity.Caretaker
-  alias Pointers.Pointer
+  alias Needle.Pointer
   alias Ecto.Changeset
 
   mixin_schema do
@@ -35,7 +35,7 @@ end
 defmodule Bonfire.Data.Identity.Caretaker.Migration do
   @moduledoc false
   import Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   alias Bonfire.Data.Identity.Caretaker
 
   @caretaker_table Caretaker.__schema__(:source)
@@ -44,12 +44,12 @@ defmodule Bonfire.Data.Identity.Caretaker.Migration do
 
   defp make_caretaker_table(exprs) do
     quote do
-      require Pointers.Migration
+      require Needle.Migration
 
-      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Caretaker do
+      Needle.Migration.create_mixin_table Bonfire.Data.Identity.Caretaker do
         add(
           :caretaker_id,
-          Pointers.Migration.strong_pointer(),
+          Needle.Migration.strong_pointer(),
           null: false
         )
 

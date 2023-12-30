@@ -4,7 +4,7 @@ defmodule Bonfire.Data.Identity.Character do
   even when the username has been deleted.
   """
 
-  use Pointers.Mixin,
+  use Needle.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_character"
 
@@ -13,7 +13,7 @@ defmodule Bonfire.Data.Identity.Character do
 
   alias Bonfire.Data.Social.Feed
   alias Ecto.Changeset
-  alias Pointers.Changesets
+  alias Needle.Changesets
   import Untangle
 
   mixin_schema do
@@ -64,7 +64,7 @@ defmodule Bonfire.Data.Identity.Character do
   defp put_boxes(changeset, _params) do
     if changeset.valid? and changeset.data.__meta__.state == :built do
       # || raise "Character requires an ID to be set on the pointable." # FIXME
-      id = Pointers.Changesets.get_field(changeset, :id)
+      id = Needle.Changesets.get_field(changeset, :id)
       # debug(id, "changeset id")
       for key <- [:outbox, :inbox, :notifications], reduce: changeset do
         changeset ->
@@ -118,15 +118,15 @@ defmodule Bonfire.Data.Identity.Character.Migration do
 
   defp make_character_table(exprs) do
     quote do
-      require Pointers.Migration
+      require Needle.Migration
 
-      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Character do
+      Needle.Migration.create_mixin_table Bonfire.Data.Identity.Character do
         Ecto.Migration.add(:username, :citext)
         Ecto.Migration.add(:username_hash, :citext)
 
-        add(:outbox_id, Pointers.Migration.weak_pointer())
-        add(:inbox_id, Pointers.Migration.weak_pointer())
-        add(:notifications_id, Pointers.Migration.weak_pointer())
+        add(:outbox_id, Needle.Migration.weak_pointer())
+        add(:inbox_id, Needle.Migration.weak_pointer())
+        add(:notifications_id, Needle.Migration.weak_pointer())
 
         unquote_splicing(exprs)
       end

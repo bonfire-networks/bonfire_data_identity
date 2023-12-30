@@ -38,7 +38,7 @@ defmodule Bonfire.Data.Identity.MixProject do
       ],
       deps:
         Mess.deps([
-          # {:pointers, path: "../../../pointers"},
+          # {:needle, path: "../../../needle"},
           #        {:argon2_elixir, "~> 4.0", optional: true},
           {:pbkdf2_elixir, "~> 2.0", only: [:dev, :test]},
           {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},

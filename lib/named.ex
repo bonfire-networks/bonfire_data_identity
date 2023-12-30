@@ -1,5 +1,5 @@
 defmodule Bonfire.Data.Identity.Named do
-  use Pointers.Mixin,
+  use Needle.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_social_named"
 
@@ -20,16 +20,16 @@ end
 defmodule Bonfire.Data.Identity.Named.Migration do
   @moduledoc false
   use Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   alias Bonfire.Data.Identity.Named
 
   # create_named_table/{0,1}
 
   defp make_named_table(exprs) do
     quote do
-      require Pointers.Migration
+      require Needle.Migration
 
-      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Named do
+      Needle.Migration.create_mixin_table Bonfire.Data.Identity.Named do
         Ecto.Migration.add(:name, :text)
         unquote_splicing(exprs)
       end

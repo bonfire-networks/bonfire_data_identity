@@ -4,7 +4,7 @@ defmodule Bonfire.Data.Identity.Account do
   has one or more credentials with which it may identify.
   """
 
-  use Pointers.Virtual,
+  use Needle.Virtual,
     otp_app: :bonfire_data_identity,
     table_id: "2CC0VNTSARE1S01AT10NGR0VPS",
     source: "bonfire_data_identity_account"
@@ -12,7 +12,7 @@ defmodule Bonfire.Data.Identity.Account do
   alias Bonfire.Data.Identity.Account
   alias Bonfire.Data.Identity.Accounted
 
-  alias Pointers.Changesets
+  alias Needle.Changesets
 
   virtual_schema do
     has_many(:accounted, Accounted, foreign_key: :account_id)
@@ -25,15 +25,15 @@ end
 defmodule Bonfire.Data.Identity.Account.Migration do
   @moduledoc false
   use Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   alias Bonfire.Data.Identity.Account
 
   # create_account_view/{0,1}
 
   defp make_account_view() do
     quote do
-      require Pointers.Migration
-      Pointers.Migration.create_virtual(Bonfire.Data.Identity.Account)
+      require Needle.Migration
+      Needle.Migration.create_virtual(Bonfire.Data.Identity.Account)
     end
   end
 

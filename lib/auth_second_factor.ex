@@ -2,7 +2,7 @@ defmodule Bonfire.Data.Identity.AuthSecondFactor do
   @moduledoc """
   A mixin that stores a second factor secret to authenticate an account.
   """
-  use Pointers.Mixin,
+  use Needle.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_auth_second_factor"
 
@@ -33,7 +33,7 @@ defmodule Bonfire.Data.Identity.AuthSecondFactor do
       |> Ecto.Changeset.validate_required(@required)
       |> Ecto.Changeset.validate_format(:code, ~r/^\d{6}$/, message: "should be a 6 digit number")
 
-    code = Pointers.Changesets.get_field(changeset, :code)
+    code = Needle.Changesets.get_field(changeset, :code)
 
     if changeset.valid? and not valid_totp?(totp, code) do
       if not is_binary(totp.secret),
@@ -84,7 +84,7 @@ defmodule Bonfire.Data.Identity.AuthSecondFactor do
   # end
 
   # def ensure_backup_codes(changeset) do
-  #   case Pointers.Changesets.get_field(changeset, :backup_codes) do
+  #   case Needle.Changesets.get_field(changeset, :backup_codes) do
   #     [] -> regenerate_backup_codes(changeset)
   #     _ -> changeset
   #   end
@@ -109,16 +109,16 @@ end
 defmodule Bonfire.Data.Identity.AuthSecondFactor.Migration do
   @moduledoc false
   use Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   alias Bonfire.Data.Identity.AuthSecondFactor
 
   # create_auth_second_factor_table/{0,1}
 
   defp make_auth_second_factor_table(exprs) do
     quote do
-      require Pointers.Migration
+      require Needle.Migration
 
-      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.AuthSecondFactor do
+      Needle.Migration.create_mixin_table Bonfire.Data.Identity.AuthSecondFactor do
         Ecto.Migration.add(:secret, :binary, null: false)
         unquote_splicing(exprs)
       end

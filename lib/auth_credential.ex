@@ -3,14 +3,14 @@ defmodule Bonfire.Data.Identity.Credential do
   A Mixin that provides a password for local login.
   """
 
-  use Pointers.Mixin,
+  use Needle.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_credential"
 
-  require Pointers.Changesets
+  require Needle.Changesets
   alias Bonfire.Data.Identity.Credential
   alias Ecto.Changeset
-  alias Pointers.Changesets
+  alias Needle.Changesets
 
   mixin_schema do
     field(:password, :string, virtual: true, redact: true)
@@ -51,7 +51,7 @@ end
 
 defmodule Bonfire.Data.Identity.Credential.Migration do
   # import Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   alias Bonfire.Data.Identity.Credential
 
   # @credential_table Credential.__schema__(:source)
@@ -60,9 +60,9 @@ defmodule Bonfire.Data.Identity.Credential.Migration do
 
   defp make_credential_table(exprs) do
     quote do
-      require Pointers.Migration
+      require Needle.Migration
 
-      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Credential do
+      Needle.Migration.create_mixin_table Bonfire.Data.Identity.Credential do
         Ecto.Migration.add(:password_hash, :text, null: false)
         unquote_splicing(exprs)
       end

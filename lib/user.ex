@@ -5,13 +5,13 @@ defmodule Bonfire.Data.Identity.User do
   so it is as if they are different people.
   """
 
-  use Pointers.Virtual,
+  use Needle.Virtual,
     otp_app: :bonfire_data_identity,
     table_id: "5EVSER1S0STENS1B1YHVMAN01D",
     source: "bonfire_data_identity_user"
 
   alias Bonfire.Data.Identity.User
-  alias Pointers.Changesets
+  alias Needle.Changesets
 
   virtual_schema do
   end
@@ -25,15 +25,15 @@ end
 defmodule Bonfire.Data.Identity.User.Migration do
   @moduledoc false
   use Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   alias Bonfire.Data.Identity.User
 
   # create_user_view/{0,1}
 
   defp make_user_view() do
     quote do
-      require Pointers.Migration
-      Pointers.Migration.create_virtual(Bonfire.Data.Identity.User)
+      require Needle.Migration
+      Needle.Migration.create_virtual(Bonfire.Data.Identity.User)
     end
   end
 

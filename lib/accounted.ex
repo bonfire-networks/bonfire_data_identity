@@ -5,7 +5,7 @@ defmodule Bonfire.Data.Identity.Accounted do
   Primarily used for Users.
   """
 
-  use Pointers.Mixin,
+  use Needle.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_accounted"
 
@@ -32,7 +32,7 @@ end
 defmodule Bonfire.Data.Identity.Accounted.Migration do
   @moduledoc false
   import Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   alias Bonfire.Data.Identity.Accounted
 
   @accounted_table Accounted.__schema__(:source)
@@ -41,9 +41,9 @@ defmodule Bonfire.Data.Identity.Accounted.Migration do
 
   defp make_accounted_table(exprs) do
     quote do
-      require Pointers.Migration
+      require Needle.Migration
 
-      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Accounted do
+      Needle.Migration.create_mixin_table Bonfire.Data.Identity.Accounted do
         add(:account_id, strong_pointer(), null: false)
         unquote_splicing(exprs)
       end

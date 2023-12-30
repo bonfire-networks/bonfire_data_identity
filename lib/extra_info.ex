@@ -1,5 +1,5 @@
 defmodule Bonfire.Data.Identity.ExtraInfo do
-  use Pointers.Mixin,
+  use Needle.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_social_extra_info"
 
@@ -21,16 +21,16 @@ end
 defmodule Bonfire.Data.Identity.ExtraInfo.Migration do
   @moduledoc false
   use Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   alias Bonfire.Data.Identity.ExtraInfo
 
   # create_extra_info_table/{0,1}
 
   defp make_extra_info_table(exprs) do
     quote do
-      require Pointers.Migration
+      require Needle.Migration
 
-      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.ExtraInfo do
+      Needle.Migration.create_mixin_table Bonfire.Data.Identity.ExtraInfo do
         Ecto.Migration.add(:summary, :text)
         Ecto.Migration.add(:info, :jsonb)
         unquote_splicing(exprs)

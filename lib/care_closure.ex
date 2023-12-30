@@ -7,15 +7,15 @@ defmodule Bonfire.Data.Identity.CareClosure do
 
   use Ecto.Schema
   import Ecto.Query, only: [from: 2]
-  alias Pointers.Pointer
+  alias Needle.Pointer
   alias Bonfire.Data.Identity.CareClosure
 
   @primary_key false
-  @foreign_key_type Pointers.ULID
+  @foreign_key_type Needle.ULID
   schema "bonfire_data_identity_care_closure" do
     belongs_to(:branch, Pointer)
     belongs_to(:leaf, Pointer)
-    field(:path, {:array, Pointers.ULID})
+    field(:path, {:array, Needle.ULID})
   end
 
   # def by_branch(branches) when is_list(branches) do
@@ -36,7 +36,7 @@ defmodule Bonfire.Data.Identity.CareClosure do
     )
   end
 
-  # Pointers.ULID.dump!(Pointers.ULID.cast!(id))
+  # Needle.ULID.dump!(Needle.ULID.cast!(id))
   defp id!(id) when is_binary(id), do: id
   # id!(id)
   defp id!(%{id: id}), do: id
@@ -45,7 +45,7 @@ end
 defmodule Bonfire.Data.Identity.CareClosure.Migration do
   @moduledoc false
   import Ecto.Migration
-  alias Pointers.Pointer
+  alias Needle.Pointer
   alias Bonfire.Data.Identity.Caretaker
 
   @pointer_table Pointer.__schema__(:source)

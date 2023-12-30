@@ -1,11 +1,11 @@
 defmodule Bonfire.Data.Identity.Email do
-  use Pointers.Mixin,
+  use Needle.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_email"
 
   alias Bonfire.Data.Identity.Email
   alias Ecto.Changeset
-  alias Pointers.Changesets
+  alias Needle.Changesets
 
   @type t() :: %Email{}
 
@@ -134,7 +134,7 @@ end
 defmodule Bonfire.Data.Identity.Email.Migration do
   @moduledoc false
   import Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   alias Bonfire.Data.Identity.Email
 
   @email_table Email.__schema__(:source)
@@ -143,9 +143,9 @@ defmodule Bonfire.Data.Identity.Email.Migration do
 
   defp make_email_table(exprs) do
     quote do
-      require Pointers.Migration
+      require Needle.Migration
 
-      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Email do
+      Needle.Migration.create_mixin_table Bonfire.Data.Identity.Email do
         Ecto.Migration.add(:email_address, :text, null: false)
         Ecto.Migration.add(:confirm_token, :text)
         Ecto.Migration.add(:confirm_until, :timestamptz)

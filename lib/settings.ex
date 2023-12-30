@@ -2,7 +2,7 @@ defmodule Bonfire.Data.Identity.Settings do
   @moduledoc """
   A mixin that stores settings (of the instance, account, user, etc) as an Erlang Term (typically a map or keyword list) encoded to binary.
   """
-  use Pointers.Mixin,
+  use Needle.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_settings"
 
@@ -32,16 +32,16 @@ end
 defmodule Bonfire.Data.Identity.Settings.Migration do
   @moduledoc false
   use Ecto.Migration
-  import Pointers.Migration
+  import Needle.Migration
   alias Bonfire.Data.Identity.Settings
 
   # create_settings_table/{0,1}
 
   defp make_settings_table(exprs) do
     quote do
-      require Pointers.Migration
+      require Needle.Migration
 
-      Pointers.Migration.create_mixin_table Bonfire.Data.Identity.Settings do
+      Needle.Migration.create_mixin_table Bonfire.Data.Identity.Settings do
         Ecto.Migration.add(:data, :binary, null: true)
         Ecto.Migration.add(:json, :jsonb)
         unquote_splicing(exprs)
