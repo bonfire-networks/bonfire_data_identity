@@ -4,16 +4,27 @@ defmodule Bonfire.Data.Identity.Named do
     source: "bonfire_data_social_named"
 
   alias Bonfire.Data.Identity.Named
-  alias Ecto.Changeset
+  import Ecto.Changeset
 
   mixin_schema do
     field(:name, :string)
   end
 
-  @cast [:name]
+  def changeset(hashtag \\ %Named{}, params, opts \\ [])
 
-  def changeset(named \\ %Named{}, params, _opts \\ []) do
-    Changeset.cast(named, params, @cast)
+  def changeset(cs, params, opts) do
+    cs
+    |> cast(params, [:name])
+    |> update_change(:name, fn name ->
+      normalize_fn = opts[:normalize_fn] || (&normalize_name/1)
+      if is_function(normalize_fn, 1), do: normalize_fn.(name), else: name
+    end)
+    |> validate_required([:name])
+  end
+
+  def normalize_name(name) do
+    name
+    |> String.trim()
   end
 end
 
