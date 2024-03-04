@@ -11,7 +11,7 @@ defmodule Bonfire.Data.Identity.AuthSecondFactor do
   # alias Ecto.Changeset
 
   mixin_schema do
-    field(:secret, :binary)
+    field(:secret, :binary, redact: true)
     field(:code, :string, virtual: true)
 
     # TODO: implement backup codes

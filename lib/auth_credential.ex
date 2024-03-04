@@ -14,7 +14,7 @@ defmodule Bonfire.Data.Identity.Credential do
 
   mixin_schema do
     field(:password, :string, virtual: true, redact: true)
-    field(:password_hash, :string)
+    field(:password_hash, :string, redact: true)
   end
 
   @cast [:password]
