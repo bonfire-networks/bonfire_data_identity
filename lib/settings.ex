@@ -10,11 +10,13 @@ defmodule Bonfire.Data.Identity.Settings do
   alias Ecto.Changeset
 
   mixin_schema do
-    field(:data, EctoSparkles.ErlangTermBinary)
-    field(:json, :map)
+    # field(:data, EctoSparkles.ErlangTermBinary)
+    # field(:data, :map, virtual: true)
+    field(:json, EctoSparkles.JSONSerdeData)
+    # field(:json, :map)
   end
 
-  @cast [:id, :data, :json]
+  @cast [:id, :json]
 
   def changeset(settings \\ %Settings{}, params, opts \\ [])
 
