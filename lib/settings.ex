@@ -12,7 +12,7 @@ defmodule Bonfire.Data.Identity.Settings do
   mixin_schema do
     # field(:data, EctoSparkles.ErlangTermBinary)
     # field(:data, :map, virtual: true)
-    field(:json, EctoSparkles.JSONSerdeData)
+    field(:json, Bonfire.Data.Identity.SettingsJSONSerdeData)
     # field(:json, :map)
   end
 
