@@ -8,7 +8,8 @@ defmodule Bonfire.Data.Identity.User do
   use Needle.Virtual,
     otp_app: :bonfire_data_identity,
     table_id: "5EVSER1S0STENS1B1YHVMAN01D",
-    source: "bonfire_data_identity_user"
+    source: "bonfire_data_identity_user",
+    id_prefix: "user"
 
   alias Bonfire.Data.Identity.User
   alias Needle.Changesets

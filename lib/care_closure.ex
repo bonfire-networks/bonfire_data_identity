@@ -36,7 +36,7 @@ defmodule Bonfire.Data.Identity.CareClosure do
     )
   end
 
-  # Needle.ULID.dump!(Needle.ULID.cast!(id))
+  # Needle.ULID.dump!(Needle.UID.cast!(id))
   defp id!(id) when is_binary(id), do: id
   # id!(id)
   defp id!(%{id: id}), do: id
