@@ -88,10 +88,10 @@ defmodule Bonfire.Data.Identity.Email do
   @spec should_request_or_refresh?(Email.t()) ::
           {:ok, :resend | :refresh} | {:error, binary}
   @doc "Checks whether the user should request a new confirmation token or refresh it"
-  def should_request_or_refresh?(%Email{} = email, _opts \\ []) do
+  def should_request_or_refresh?(%Email{confirm_until: confirm_until} = _email, _opts \\ []) do
     cond do
-      email.confirm_until &&
-          DateTime.compare(email.confirm_until, DateTime.utc_now()) == :lt ->
+      confirm_until &&
+          DateTime.compare(confirm_until, DateTime.utc_now()) == :gt ->
         {:ok, :resend}
 
       true ->
@@ -104,17 +104,17 @@ defmodule Bonfire.Data.Identity.Email do
   @doc "Checks whether the user should be able to request a confirm email"
   def may_request_confirm_email?(%Email{} = email, opts \\ []) do
     cond do
-      not is_nil(email.confirmed_at) -> {:error, "already_confirmed"}
-      not must_confirm?(opts) -> {:error, "confirmation_disabled"}
+      not is_nil(email.confirmed_at) -> {:error, :already_confirmed}
+      not must_confirm?(opts) -> {:error, :confirmation_disabled}
       true -> should_request_or_refresh?(email, opts)
     end
   end
 
   def may_confirm?(%Email{} = email, opts \\ []) do
     cond do
-      not is_nil(email.confirmed_at) -> {:error, "already_confirmed"}
-      is_nil(email.confirm_until) -> {:error, "no_expiry"}
-      not must_confirm?(opts) -> {:error, "confirmation_disabled"}
+      not is_nil(email.confirmed_at) -> {:error, :already_confirmed}
+      is_nil(email.confirm_until) -> {:error, :no_expiry}
+      not must_confirm?(opts) -> {:error, :confirmation_disabled}
       DateTime.compare(email.confirm_until, DateTime.utc_now()) == :gt -> :ok
       true -> {:error, :expired}
     end
