@@ -1,0 +1,60 @@
+name: Main branch
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "*"
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  MIX_ENV: test
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        elixir-version: ['1.17.3']
+        otp-version: ['27.1', '25.2.3']
+        mix-env: ['prod', 'test']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ matrix.elixir-version }} # [Required] Define the Elixir version
+          otp-version: ${{ matrix.otp-version }}       # [Required] Define the Erlang/OTP version
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - name: Setup just
+        run: sudo snap install --edge just --classic
+        shell: bash
+
+      - name: Get dependencies
+        run: |
+          export MIX_ENV=${{ matrix.mix-env }}
+          mix deps.get
+        shell: bash
+
+      - name: Compile package
+        run: |
+          export MIX_ENV=${{ matrix.mix-env }}
+          mix compile
+        shell: bash
