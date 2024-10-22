@@ -38,15 +38,17 @@ defmodule Bonfire.Data.Identity.Credential do
     |> Changeset.validate_confirmation(:password)
   end
 
-  @module Application.compile_env(
-            :bonfire_data_identity,
-            [__MODULE__, :hasher_module],
-            Argon2
-          )
+  def hasher_module do
+    Application.get_env(
+      :bonfire_data_identity,
+      [__MODULE__, :hasher_module],
+      Argon2
+    )
+  end
 
-  def hash_password(password), do: @module.hash_pwd_salt(password)
-  def check_password(password, hash), do: @module.verify_pass(password, hash)
-  def dummy_check(), do: @module.no_user_verify()
+  def hash_password(password), do: hasher_module().hash_pwd_salt(password)
+  def check_password(password, hash), do: hasher_module().verify_pass(password, hash)
+  def dummy_check(), do: hasher_module().no_user_verify()
 end
 
 defmodule Bonfire.Data.Identity.Credential.Migration do
