@@ -49,7 +49,7 @@ defmodule Bonfire.Data.Identity.MixProject do
 
   def application do
     [
-      env: [{Bonfire.Data.Identity.Credential, hasher_module: Argon2}],
+      # env: [{Bonfire.Data.Identity.Credential, hasher_module: Argon2}],
       extra_applications: [:logger]
     ]
   end
