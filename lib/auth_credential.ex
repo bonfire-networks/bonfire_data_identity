@@ -41,9 +41,9 @@ defmodule Bonfire.Data.Identity.Credential do
   def hasher_module do
     Application.get_env(
       :bonfire_data_identity,
-      [__MODULE__, :hasher_module],
-      Argon2
-    )
+      __MODULE__,
+      []
+    )[:hasher_module] || Argon2
   end
 
   def hash_password(password), do: hasher_module().hash_pwd_salt(password)
