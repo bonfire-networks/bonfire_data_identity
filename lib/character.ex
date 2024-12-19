@@ -18,7 +18,7 @@ defmodule Bonfire.Data.Identity.Character do
 
   mixin_schema do
     field(:username, :string,
-      redact: Bonfire.Data.Identity.User.maybe_redact(Application.get_env(:bonfire, :env))
+      redact: Bonfire.Data.Identity.User.maybe_redact(Application.compile_env(:bonfire, :env))
     )
 
     field(:username_hash, :string, redact: true)

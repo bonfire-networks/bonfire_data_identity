@@ -11,7 +11,7 @@ defmodule Bonfire.Data.Identity.Email do
 
   mixin_schema do
     field(:email_address, :string,
-      redact: Bonfire.Data.Identity.User.maybe_redact(Application.get_env(:bonfire, :env))
+      redact: Bonfire.Data.Identity.User.maybe_redact(Application.compile_env(:bonfire, :env))
     )
 
     field(:confirm_token, :string)

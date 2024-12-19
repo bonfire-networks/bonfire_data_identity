@@ -41,7 +41,8 @@ defmodule Bonfire.Data.Identity.MixProject do
           # {:needle, path: "../../../needle"},
           #        {:argon2_elixir, "~> 4.0", optional: true},
           {:pbkdf2_elixir, "~> 2.0", only: [:dev, :test]},
-          {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+          {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},      
+          {:json_serde, "~> 1.1", optional: true},
           {:nimble_totp, "~> 1.0.0", optional: true}
         ])
     ]
