@@ -7,7 +7,7 @@ defmodule Bonfire.Data.Identity.Email do
   alias Ecto.Changeset
   alias Needle.Changesets
 
-  @type t() :: %Email{}
+  # @type t() :: %Email{}
 
   mixin_schema do
     field(:email_address, :string,
