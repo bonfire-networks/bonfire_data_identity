@@ -7,11 +7,12 @@ defmodule Bonfire.Data.Identity.ExtraInfo do
   alias Ecto.Changeset
 
   mixin_schema do
+    # TODO: move this into the info map?
     field(:summary, :string)
     field(:info, :map)
   end
 
-  @cast [:summary, :info]
+  @cast [:id, :summary, :info]
 
   def changeset(extra_info \\ %ExtraInfo{}, params, _opts \\ []) do
     Changeset.cast(extra_info, params, @cast)
