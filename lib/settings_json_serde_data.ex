@@ -25,20 +25,22 @@ defmodule Bonfire.Data.Identity.SettingsJSONSerdeData do
 
   def load(json_data) do
     JsonSerde.Deserializer.deserialize(json_data, json_data)
-    |> debug("deserialized #{inspect(json_data)}")
+    # |> debug("deserialized #{inspect(json_data)}")
     |> loaded()
   end
 
   defp loaded({:ok, data}) do
     # TODO: add support for atom keys in Map to JsonSerde (see open PR there) so we can avoid needing input_to_atoms here?
-    {:ok,
-     data
-     |> Bonfire.Common.Enums.input_to_atoms(
-       discard_unknown_keys: true,
-       values: false,
-       also_discard_unknown_nested_keys: false
-     )
-     |> debug("prepared #{inspect(data)}")}
+    {
+      :ok,
+      data
+      |> Bonfire.Common.Enums.input_to_atoms(
+        discard_unknown_keys: true,
+        values: false,
+        also_discard_unknown_nested_keys: false
+      )
+      #  |> debug("prepared #{inspect(data)}")
+    }
   end
 
   defp loaded(other), do: other
