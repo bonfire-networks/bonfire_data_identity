@@ -19,7 +19,7 @@ defmodule Bonfire.Data.Identity.SettingsJSONSerdeData do
   """
   def load(raw_json) when is_binary(raw_json) do
     JsonSerde.deserialize(raw_json)
-    |> debug("deserialized #{raw_json}")
+    # |> debug("deserialized #{raw_json}")
     |> loaded()
   end
 
