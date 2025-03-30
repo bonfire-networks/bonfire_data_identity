@@ -85,8 +85,8 @@ defmodule Bonfire.Data.Identity.Email do
     )
   end
 
-  @spec should_request_or_refresh?(Email.t()) ::
-          {:ok, :resend | :refresh} | {:error, binary}
+  # @spec should_request_or_refresh?(Email.t()) ::
+  #         {:ok, :resend | :refresh} | {:error, binary}
   @doc "Checks whether the user should request a new confirmation token or refresh it"
   def should_request_or_refresh?(%Email{confirm_until: confirm_until} = _email, _opts \\ []) do
     cond do
@@ -99,8 +99,8 @@ defmodule Bonfire.Data.Identity.Email do
     end
   end
 
-  @spec may_request_confirm_email?(Email.t()) ::
-          {:ok, :resend | :refresh} | {:error, binary}
+  # @spec may_request_confirm_email?(Email.t()) ::
+  #         {:ok, :resend | :refresh} | {:error, binary}
   @doc "Checks whether the user should be able to request a confirm email"
   def may_request_confirm_email?(%Email{} = email, opts \\ []) do
     cond do
