@@ -3,6 +3,7 @@ defmodule Bonfire.Data.Identity.Email do
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_email"
 
+  import Untangle
   alias Bonfire.Data.Identity.Email
   alias Ecto.Changeset
   alias Needle.Changesets
@@ -89,13 +90,12 @@ defmodule Bonfire.Data.Identity.Email do
   #         {:ok, :resend | :refresh} | {:error, binary}
   @doc "Checks whether the user should request a new confirmation token or refresh it"
   def should_request_or_refresh?(%Email{confirm_until: confirm_until} = _email, _opts \\ []) do
-    cond do
-      confirm_until &&
-          DateTime.compare(confirm_until, DateTime.utc_now()) == :gt ->
-        {:ok, :resend}
-
-      true ->
-        {:ok, :refresh}
+    if confirm_until &&
+         DateTime.compare(confirm_until, DateTime.utc_now()) |> debug("confirm_until_relative") ==
+           :gt do
+      {:ok, :resend}
+    else
+      {:ok, :refresh}
     end
   end
 
