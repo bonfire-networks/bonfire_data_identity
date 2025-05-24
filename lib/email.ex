@@ -23,7 +23,7 @@ defmodule Bonfire.Data.Identity.Email do
   # one day
   @default_confirm_duration {60 * 60 * 24, :second}
   # pretty loose
-  @default_email_regex ~r(^[^@]{1,128}@[^@]{2,128}$)
+  def default_email_regex, do: ~r(^[^@]{1,128}@[^@]{2,128}$)
 
   @doc """
   Options:
@@ -31,7 +31,7 @@ defmodule Bonfire.Data.Identity.Email do
     must_confirm?: bool (default true)
   """
   def changeset(email \\ %Email{}, params, opts \\ []) do
-    regex = config(opts, :email_regex, @default_email_regex)
+    regex = config(opts, :email_regex, default_email_regex())
 
     Changeset.cast(email, params, [:email_address])
     |> Changeset.validate_format(:email_address, regex)
