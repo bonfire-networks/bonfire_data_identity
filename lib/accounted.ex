@@ -41,10 +41,10 @@ defmodule Bonfire.Data.Identity.Accounted.Migration do
 
   defp make_accounted_table(exprs) do
     quote do
-      require Needle.Migration
+      import Needle.Migration
 
       Needle.Migration.create_mixin_table Bonfire.Data.Identity.Accounted do
-        add(:account_id, strong_pointer(), null: false)
+        add_pointer(:account_id, :strong, Needle.Pointer, null: false)
         unquote_splicing(exprs)
       end
     end

@@ -44,15 +44,10 @@ defmodule Bonfire.Data.Identity.Caretaker.Migration do
 
   defp make_caretaker_table(exprs) do
     quote do
-      require Needle.Migration
+      import Needle.Migration
 
       Needle.Migration.create_mixin_table Bonfire.Data.Identity.Caretaker do
-        add(
-          :caretaker_id,
-          Needle.Migration.strong_pointer(),
-          null: false
-        )
-
+        add_pointer(:caretaker_id, :strong, Needle.Pointer, null: false)
         unquote_splicing(exprs)
       end
     end

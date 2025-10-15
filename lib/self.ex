@@ -34,20 +34,11 @@ defmodule Bonfire.Data.Identity.Self.Migration do
 
   defp make_self_table(exprs) do
     quote do
-      require Needle.Migration
+      import Needle.Migration
 
       Needle.Migration.create_mixin_table Bonfire.Data.Identity.Self do
-        Ecto.Migration.add(
-          :self_acl_id,
-          Needle.Migration.strong_pointer(Bonfire.Data.AccessControl.Acl),
-          null: false
-        )
-
-        Ecto.Migration.add(
-          :admin_acl_id,
-          Needle.Migration.strong_pointer(Bonfire.Data.AccessControl.Acl),
-          null: false
-        )
+        add_pointer(:self_acl_id, :strong, Bonfire.Data.AccessControl.Acl, null: false)
+        add_pointer(:admin_acl_id, :strong, Bonfire.Data.AccessControl.Acl, null: false)
 
         unquote_splicing(exprs)
       end

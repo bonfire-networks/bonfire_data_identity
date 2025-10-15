@@ -118,15 +118,15 @@ defmodule Bonfire.Data.Identity.Character.Migration do
 
   defp make_character_table(exprs) do
     quote do
-      require Needle.Migration
+      import Needle.Migration
 
       Needle.Migration.create_mixin_table Bonfire.Data.Identity.Character do
         Ecto.Migration.add(:username, :citext)
         Ecto.Migration.add(:username_hash, :citext)
 
-        add(:outbox_id, Needle.Migration.weak_pointer())
-        add(:inbox_id, Needle.Migration.weak_pointer())
-        add(:notifications_id, Needle.Migration.weak_pointer())
+        add_pointer(:outbox_id, :weak)
+        add_pointer(:inbox_id, :weak)
+        add_pointer(:notifications_id, :weak)
 
         unquote_splicing(exprs)
       end
