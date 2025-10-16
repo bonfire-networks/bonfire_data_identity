@@ -110,6 +110,7 @@ end
 defmodule Bonfire.Data.Identity.Character.Migration do
   @moduledoc false
   import Ecto.Migration
+  use Needle.Migration.Indexable
   alias Bonfire.Data.Identity.Character
 
   @character_table Character.__schema__(:source)
@@ -188,6 +189,12 @@ defmodule Bonfire.Data.Identity.Character.Migration do
     drop_if_exists(unique_index(@character_table, [:username_hash], opts))
   end
 
+  def add_character_feed_indexes do
+    create_index_for_pointer(@character_table, :outbox_id)
+    create_index_for_pointer(@character_table, :inbox_id)
+    create_index_for_pointer(@character_table, :notifications_id)
+  end
+
   @function_up """
   create or replace function bonfire_identity_delete_username()
   returns trigger as $$
@@ -240,6 +247,8 @@ defmodule Bonfire.Data.Identity.Character.Migration do
       unquote(make_character_username_index([]))
       unquote(make_character_username_hash_index([]))
       Ecto.Migration.flush()
+
+      Bonfire.Data.Identity.Character.Migration.add_character_feed_indexes()
 
       Bonfire.Data.Identity.Character.Migration.create_character_trigger_function()
 

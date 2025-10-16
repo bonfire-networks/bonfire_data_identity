@@ -1,4 +1,5 @@
 defmodule Bonfire.Data.Identity.Self do
+  # TODO: remove if not used?
   use Needle.Mixin,
     otp_app: :bonfire_data_identity,
     source: "bonfire_data_identity_self"
