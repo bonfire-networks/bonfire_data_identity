@@ -1,4 +1,4 @@
 
-needle = "~> 0.7"
-untangle = "~> 0.3"
-ecto_sparkles = "~> 0.1"
+needle = "~> 0.9"
+untangle = "~> 0.4"
+ecto_sparkles = "~> 0.3"
