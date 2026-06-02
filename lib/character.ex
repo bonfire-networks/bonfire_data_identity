@@ -1,7 +1,17 @@
 defmodule Bonfire.Data.Identity.Character do
   @moduledoc """
-  A username mixin that denies reuse of the same or similar usernames
-  even when the username has been deleted.
+  A username mixin that denies reuse of the same or *visually similar* usernames, even after a username has been deleted.
+
+  ## Why
+
+  Each character stores a `username_hash` alongside its `username`. The hash is covered by a unique index, so it acts as a second uniqueness guarantee that:
+
+    * survives username deletion (the row is kept, only `username` is nulled by a DB trigger), preventing a freed handle from being silently re-registered, and
+    * catches *confusable* usernames — handles that look alike to a human but differ byte-for-byte (e.g. `bob1` vs `bobl`) — so they cannot be used to impersonate or squat on each other.
+
+  ## How
+
+  `hash/1` builds the hash by running the username through `uniform/1` (which canonicalises confusable characters), then SHA-256 + unpadded Base64. Two usernames that `uniform/1` maps to the same string therefore share a hash and are treated as the same identity.
   """
 
   use Needle.Mixin,
@@ -85,23 +95,47 @@ defmodule Bonfire.Data.Identity.Character do
     cs
   end
 
+  @doc """
+  Returns the unique hash used to deny reuse of the same or confusable usernames.
+
+  The name is canonicalised with `uniform/1` (so confusable handles collapse to the same value), then hashed with SHA-256 and Base64-encoded (unpadded).
+
+  ## Examples
+
+      iex> Bonfire.Data.Identity.Character.hash("bob") == Bonfire.Data.Identity.Character.hash("BOB")
+      true
+  """
   def hash(name) do
     :crypto.hash(:sha256, uniform(name))
     |> Base.encode64(padding: false)
   end
 
+  @doc """
+  Canonicalises a username for hashing by lowercasing it and folding visually confusable characters (see `fold/1`).
+
+  ## Examples
+
+      iex> Bonfire.Data.Identity.Character.uniform("B0b_1")
+      "bobl"
+
+      iex> Bonfire.Data.Identity.Character.uniform("bob7")
+      "bob7"
+  """
   def uniform(name) do
     name
     |> String.downcase(:ascii)
-    |> String.replace(~r/[0123578i_]/, &fold/1)
+    |> String.replace(~r/[012358i_]/, &fold/1)
   end
 
+  @doc false
+  # Folds a single confusable character to its canonical form. Note that `7` is
+  # deliberately not folded: it is not a strong look-alike for any letter, and
+  # folding it to `l` made `…7` usernames collide with `…l`/`…1`/`…i` ones.
   defp fold("0"), do: "o"
   defp fold("1"), do: "l"
   defp fold("2"), do: "z"
   defp fold("3"), do: "e"
   defp fold("5"), do: "s"
-  defp fold("7"), do: "l"
   defp fold("8"), do: "b"
   defp fold("i"), do: "l"
   defp fold("_"), do: ""
