@@ -58,7 +58,7 @@ defmodule Bonfire.Data.Identity.Character do
     |> Changeset.unique_constraint(:username)
     |> put_boxes(params)
 
-    # |> IO.inspect()
+    # 
   end
 
   def changeset(char, params, :update) do
