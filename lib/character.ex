@@ -177,14 +177,29 @@ defmodule Bonfire.Data.Identity.Character.Migration do
 
   def drop_character_table(), do: drop_if_exists(table(@character_table))
 
+  @doc """
+  Unique index on a citext `column`. YugabyteDB can't currently index citext (https://github.com/yugabyte/yugabyte-db/issues/9698), so we indexe `lower(column::text)` instead, under the same name so drops match either way. Uniqueness stays case-insensitive, but citext equality lookups can't use that index.
+  """
+  # TODO: switch to text columns + a lower() index on every DB (and query with lower()) so YugabyteDB lookups are indexed too
+  def citext_unique_index(column, opts \\ []) do
+    if System.get_env("DB_ADAPTER") == "yugabyte" do
+      unique_index(
+        @character_table,
+        ["lower(#{column}::text)"],
+        Keyword.put_new(opts, :name, "#{@character_table}_#{column}_index")
+      )
+    else
+      unique_index(@character_table, [column], opts)
+    end
+  end
+
   # create_character_username_index/{0, 1}
 
   defp make_character_username_index(opts) do
     quote do
       Ecto.Migration.create_if_not_exists(
-        Ecto.Migration.unique_index(
-          unquote(@character_table),
-          [:username],
+        Bonfire.Data.Identity.Character.Migration.citext_unique_index(
+          :username,
           unquote(opts)
         )
       )
@@ -197,7 +212,7 @@ defmodule Bonfire.Data.Identity.Character.Migration do
     do: make_character_username_index(opts)
 
   def drop_character_username_index(opts \\ []) do
-    drop_if_exists(unique_index(@character_table, [:username], opts))
+    drop_if_exists(citext_unique_index(:username, opts))
   end
 
   # create_character_username_hash_index/{0, 1}
@@ -205,9 +220,8 @@ defmodule Bonfire.Data.Identity.Character.Migration do
   defp make_character_username_hash_index(opts) do
     quote do
       Ecto.Migration.create_if_not_exists(
-        Ecto.Migration.unique_index(
-          unquote(@character_table),
-          [:username_hash],
+        Bonfire.Data.Identity.Character.Migration.citext_unique_index(
+          :username_hash,
           unquote(opts)
         )
       )
@@ -220,7 +234,7 @@ defmodule Bonfire.Data.Identity.Character.Migration do
     do: make_character_username_hash_index(opts)
 
   def drop_character_username_hash_index(opts \\ []) do
-    drop_if_exists(unique_index(@character_table, [:username_hash], opts))
+    drop_if_exists(citext_unique_index(:username_hash, opts))
   end
 
   def add_character_feed_indexes do
