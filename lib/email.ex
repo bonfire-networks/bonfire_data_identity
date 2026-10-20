@@ -22,6 +22,8 @@ defmodule Bonfire.Data.Identity.Email do
 
   # one day
   @default_confirm_duration {60 * 60 * 24, :second}
+  # five minutes
+  @default_confirm_grace {5, :minute}
   # pretty loose
   def default_email_regex, do: ~r(^[^@]{1,128}@[^@]{2,128}$)
 
@@ -86,11 +88,29 @@ defmodule Bonfire.Data.Identity.Email do
     )
   end
 
+  @doc """
+  Changeset function. Marks the email as confirmed by redeeming its emailed token. Unlike `confirm/1`, it keeps the token for a short grace period, set by the `:confirm_grace` config key as `{count, unit}` (default five minutes). Within it, the same link works again, so a mail scanner, a double click or a refresh using the link first doesn't lock the person out. `token_state/2` reports `:already_confirmed` once the grace period is over.
+  """
+  def redeem(%Email{} = email), do: redeem(Changeset.cast(email, %{}, []))
+
+  def redeem(%Changeset{data: %Email{}} = changeset) do
+    {count, unit} = config(:confirm_grace, @default_confirm_grace)
+    now = DateTime.utc_now()
+
+    Changeset.change(changeset,
+      confirmed_at: now,
+      confirm_until: DateTime.add(now, count, unit)
+    )
+  end
+
   # @spec should_request_or_refresh?(Email.t()) ::
   #         {:ok, :resend | :refresh} | {:error, binary}
-  @doc "Checks whether the user should request a new confirmation token or refresh it"
-  def should_request_or_refresh?(%Email{confirm_until: confirm_until} = _email, _opts \\ []) do
-    if confirm_until &&
+  @doc "Checks whether the user should request a new confirmation token or refresh it. A confirmed email always gets a fresh token: whatever token it still holds is in its grace period (see `redeem/1`), and a new link needs one with a full lifetime."
+  def should_request_or_refresh?(
+        %Email{confirm_until: confirm_until, confirmed_at: confirmed_at} = _email,
+        _opts \\ []
+      ) do
+    if is_nil(confirmed_at) && confirm_until &&
          DateTime.compare(confirm_until, DateTime.utc_now()) |> debug("confirm_until_relative") ==
            :gt do
       {:ok, :resend}
@@ -110,13 +130,40 @@ defmodule Bonfire.Data.Identity.Email do
     end
   end
 
-  def may_confirm?(%Email{} = email, opts \\ []) do
+  @doc """
+  Where an emailed token stands right now. Returns `:fresh` (not used yet), `:redeemed` (used, still within its grace period, see `redeem/1`), or `{:error, reason}` where reason is `:already_confirmed`, `:no_expiry`, `:confirmation_disabled` or `:expired`.
+
+  Reset and sign-in links pass a `:confirm_action` and work whether or not the instance requires confirmation of new accounts, so for them `:confirmation_disabled` doesn't apply.
+  """
+  def token_state(%Email{} = email, opts \\ []) do
+    now = DateTime.utc_now()
+
     cond do
-      not is_nil(email.confirmed_at) -> {:error, :already_confirmed}
-      is_nil(email.confirm_until) -> {:error, :no_expiry}
-      not must_confirm?(opts) -> {:error, :confirmation_disabled}
-      DateTime.compare(email.confirm_until, DateTime.utc_now()) == :gt -> :ok
-      true -> {:error, :expired}
+      not is_nil(email.confirmed_at) ->
+        if not is_nil(email.confirm_token) and not is_nil(email.confirm_until) and
+             DateTime.compare(email.confirm_until, now) == :gt,
+           do: :redeemed,
+           else: {:error, :already_confirmed}
+
+      is_nil(email.confirm_until) ->
+        {:error, :no_expiry}
+
+      is_nil(opts[:confirm_action]) and not must_confirm?(opts) ->
+        {:error, :confirmation_disabled}
+
+      DateTime.compare(email.confirm_until, now) == :gt ->
+        :fresh
+
+      true ->
+        {:error, :expired}
+    end
+  end
+
+  @doc "Whether the emailed token could be used right now (see `token_state/2`)."
+  def may_confirm?(%Email{} = email, opts \\ []) do
+    case token_state(email, opts) do
+      state when state in [:fresh, :redeemed] -> :ok
+      error -> error
     end
   end
 
